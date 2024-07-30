@@ -1,4 +1,4 @@
-package com.github.cyberedcake.hystats.utils.hypixel;
+package com.github.cyberedcake.hystats.hypixel;
 
 import org.jetbrains.annotations.Nullable;
 

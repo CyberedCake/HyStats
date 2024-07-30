@@ -33,9 +33,9 @@ public abstract class StatsCategoryCommand {
         this.aliases = aliases;
     }
 
-    public abstract void execute(ICommandSender sender, PlayerReply.Player player, StatusReply.Session session, String[] args);
+    public abstract void execute(ICommandSender sender, String displayName, PlayerReply.Player player, StatusReply.Session session, String[] args);
 
-    public abstract void oneLine(ICommandSender sender, PlayerReply.Player player, StatusReply.Session session, String[] args);
+    public abstract void oneLine(ICommandSender sender, String displayName, PlayerReply.Player player, StatusReply.Session session, String[] args);
 
     protected void send(String msg) {
         send(msg, null);

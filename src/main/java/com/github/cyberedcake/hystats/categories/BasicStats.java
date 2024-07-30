@@ -2,8 +2,6 @@ package com.github.cyberedcake.hystats.categories;
 
 import com.github.cyberedcake.hystats.command.StatsCategoryCommand;
 import com.github.cyberedcake.hystats.utils.UChat;
-import com.github.cyberedcake.hystats.utils.hypixel.HypixelGame;
-import com.github.cyberedcake.hystats.utils.hypixel.HypixelRank;
 import com.github.cyberedcake.hystats.utils.Time;
 import com.github.cyberedcake.hystats.utils.Utils;
 import com.google.gson.JsonObject;
@@ -16,8 +14,6 @@ import net.minecraft.util.IChatComponent;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class BasicStats extends StatsCategoryCommand {
 
@@ -27,8 +23,7 @@ public class BasicStats extends StatsCategoryCommand {
 
 
     @Override
-    public void execute(ICommandSender sender, PlayerReply.Player player, StatusReply.Session session, String[] args) {
-        String display = HypixelRank.getRank(player).format(player);
+    public void execute(ICommandSender sender, String display, PlayerReply.Player player, StatusReply.Session session, String[] args) {
         send("Stats of " + display);
         send("Hypixel Level: &6" + Utils.formatDouble(player.getNetworkLevel()));
         send("Achievement Points: &e" + Utils.formatDouble(player.getIntProperty("achievementPoints", 0)));
@@ -41,7 +36,7 @@ public class BasicStats extends StatsCategoryCommand {
             IChatComponent component = UChat.chat("Social Media: &7" + object.asMap().size() + " linked account" + (object.asMap().size() == 1 ? "" : "s") + " ... click to view!");
             component.getChatStyle()
                     .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, UChat.chat("&eClick to view " + display + "&e'" + (player.getName().endsWith("s") ? "" : "s") + " social media!")))
-                    .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hystats " + player.getUuid().toString() + " socials"));
+                    .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hystats " + player.getName() + " socials"));
             send(component);
         }
 
@@ -69,8 +64,7 @@ public class BasicStats extends StatsCategoryCommand {
     }
 
     @Override
-    public void oneLine(ICommandSender sender, PlayerReply.Player player, StatusReply.Session session, String[] args) {
-        String display = HypixelRank.getRank(player).format(player);
+    public void oneLine(ICommandSender sender, String display, PlayerReply.Player player, StatusReply.Session session, String[] args) {
         send(display);
         send("HL: &6" + Utils.formatDouble(player.getNetworkLevel()));
         send("AP: &e" + Utils.formatDouble(player.getIntProperty("achievementPoints", 0)));

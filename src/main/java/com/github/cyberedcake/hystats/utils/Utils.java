@@ -3,6 +3,8 @@ package com.github.cyberedcake.hystats.utils;
 import net.hypixel.api.reply.PlayerReply;
 
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
@@ -23,6 +25,15 @@ public class Utils {
             UUID.fromString(input);
             return true;
         } catch (IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
+    public static boolean isUrl(String input) {
+        try {
+            new URL(input);
+            return true;
+        } catch (MalformedURLException exception) {
             return false;
         }
     }

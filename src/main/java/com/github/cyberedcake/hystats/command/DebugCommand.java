@@ -29,23 +29,41 @@ public class DebugCommand extends CommandBase {
         return "/$statsdebug";
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        if (args[0].equalsIgnoreCase("--reload-api")) {
-            if (ExampleMod.API != null) {
-                UChat.send("&7&oShutting down API...", null, false);
-                ExampleMod.shutdownApi();
+        try {
+            if (args.length < 1) {
+                send("&cMust provide a parameter!");
+                return;
             }
 
-            ExampleMod.loadApi();
-            UChat.send("&aReloaded the Hypixel API!", null, false);
+            if (args[0].equalsIgnoreCase("--reload-api")) {
+                if (ExampleMod.API != null) {
+                    send("&7&oShutting down API...");
+                    ExampleMod.shutdownApi();
+                }
+
+                ExampleMod.loadApi();
+                send("&aReloaded the Hypixel API!");
+            } else {
+                send("&cInvalid parameter!");
+            }
+        } catch (Exception exception) {
+            send("&cFailed to run debugger: &8" + exception);
+            exception.printStackTrace();
         }
+    }
+
+    private void send(String msg) {
+        UChat.send("&6&lHyStats Debugger: &f" + msg, null, false);
     }
 
     @Override
     public boolean canCommandSenderUseCommand(ICommandSender sender) {
-        if (!(sender instanceof EntityPlayer)) return true;
-        return allowedUuids.contains(((EntityPlayer) sender).getUniqueID());
+//        if (!(sender instanceof EntityPlayer)) return true;
+//        return allowedUuids.contains(((EntityPlayer) sender).getUniqueID());
+        return true;
     }
 
 }

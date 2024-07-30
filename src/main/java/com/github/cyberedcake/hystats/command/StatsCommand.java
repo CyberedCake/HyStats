@@ -2,29 +2,23 @@ package com.github.cyberedcake.hystats.command;
 
 import com.github.cyberedcake.hystats.ExampleMod;
 import com.github.cyberedcake.hystats.categories.BasicStats;
+import com.github.cyberedcake.hystats.categories.Socials;
+import com.github.cyberedcake.hystats.exceptions.NoHypixelPlayerException;
+import com.github.cyberedcake.hystats.exceptions.UuidNotExist;
+import com.github.cyberedcake.hystats.hypixel.CachedApiCall;
 import com.github.cyberedcake.hystats.utils.UChat;
-import com.github.cyberedcake.hystats.utils.UUIDGrabber;
-import com.github.cyberedcake.hystats.utils.Utils;
-import com.mojang.authlib.GameProfile;
-import net.hypixel.api.HypixelAPI;
-import net.hypixel.api.reply.PlayerReply;
-import net.hypixel.api.reply.StatusReply;
-import net.minecraft.client.Minecraft;
+import com.github.cyberedcake.hystats.hypixel.HypixelRank;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
-import sun.rmi.runtime.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
 
 public class StatsCommand extends CommandBase {
 
@@ -33,6 +27,7 @@ public class StatsCommand extends CommandBase {
 
     public StatsCommand() {
         commands.add(new BasicStats());
+        commands.add(new Socials());
 
         noArgumentCommand = commands.stream().filter(cmd -> cmd.getClass() == BasicStats.class).findFirst().orElseThrow(() -> new RuntimeException("No basic stats command!"));
     }
@@ -89,16 +84,26 @@ public class StatsCommand extends CommandBase {
                 return;
             }
 
-            StatsCategoryCommand finalCommand = command;
-            UChat.send("&7&oLoading stats, please wait...", null, false);
-            CompletableFuture.runAsync(() -> {
-                PlayerReply playerReply;
-                StatusReply statusReply;
-                try {
-                    UUID uuid = Utils.isUuid(player) ? UUID.fromString(player) : UUIDGrabber.getUUIDOf(player);
+            if (player.length() > 16
+                    || !StringUtils.isAlphanumeric(player.replace("_", ""))
+            ) {
+                UChat.send("&cThat player does not exist!", null, true); return;
+            }
 
-                    playerReply = ExampleMod.API.getPlayerByUuid(uuid).get(20, TimeUnit.SECONDS);
-                    statusReply = ExampleMod.API.getStatus(uuid).get(20, TimeUnit.SECONDS);
+            if (!CachedApiCall.isCached(player))
+                UChat.send("&7&oLoading stats, please wait...", null, false);
+
+            StatsCategoryCommand finalCommand = command;
+            CompletableFuture.runAsync(() -> {
+                CachedApiCall api;
+                try {
+                    api = CachedApiCall.grab(player);
+                } catch (UuidNotExist notExist) {
+                    UChat.send("&cThat player does not exist!", "&cException:\n&8" + notExist, true);
+                    return;
+                } catch (NoHypixelPlayerException hypixelPlayerException) {
+                    UChat.send("&cThat player has never logged onto Hypixel!", "&cException:\n&8" + hypixelPlayerException, true);
+                    return;
                 } catch (TimeoutException timeout) {
                     UChat.send("&cFailed to send request to Hypixel API: &8Request timed out!", "&cException:\n&8" + timeout, true);
                     timeout.printStackTrace();
@@ -119,10 +124,11 @@ public class StatsCommand extends CommandBase {
 
                 try {
                     IChatComponent text = new ChatComponentText("");
+                    String display = HypixelRank.getRank(api.player).format(api.player);
                     if (showAll) {
-                        finalCommand.execute(sender, playerReply.getPlayer(), statusReply.getSession(), args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
+                        finalCommand.execute(sender, display, api.player, api.session, args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
                     } else {
-                        finalCommand.oneLine(sender, playerReply.getPlayer(), statusReply.getSession(), args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
+                        finalCommand.oneLine(sender, display, api.player, api.session, args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
                     }
 
                     int index = 0;

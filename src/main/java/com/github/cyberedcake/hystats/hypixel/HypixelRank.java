@@ -1,4 +1,4 @@
-package com.github.cyberedcake.hystats.utils.hypixel;
+package com.github.cyberedcake.hystats.hypixel;
 
 import com.github.cyberedcake.hystats.utils.ColorCode;
 import net.hypixel.api.reply.PlayerReply;

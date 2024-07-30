@@ -1,5 +1,6 @@
 package com.github.cyberedcake.hystats.utils;
 
+import com.github.cyberedcake.hystats.exceptions.UuidNotExist;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -32,7 +33,7 @@ public class UUIDGrabber {
 
             return returned;
         } catch (Exception exception) {
-            throw new IllegalStateException("Failed to fetch UUID from username (" + username + ") from " + url + ": " + exception, exception);
+            return null;
         }
     }
 
