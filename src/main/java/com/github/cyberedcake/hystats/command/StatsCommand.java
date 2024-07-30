@@ -3,16 +3,27 @@ package com.github.cyberedcake.hystats.command;
 import com.github.cyberedcake.hystats.ExampleMod;
 import com.github.cyberedcake.hystats.categories.BasicStats;
 import com.github.cyberedcake.hystats.utils.UChat;
+import com.github.cyberedcake.hystats.utils.UUIDGrabber;
+import com.github.cyberedcake.hystats.utils.Utils;
+import com.mojang.authlib.GameProfile;
 import net.hypixel.api.HypixelAPI;
 import net.hypixel.api.reply.PlayerReply;
+import net.hypixel.api.reply.StatusReply;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import sun.rmi.runtime.Log;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 public class StatsCommand extends CommandBase {
@@ -44,21 +55,19 @@ public class StatsCommand extends CommandBase {
     @SuppressWarnings("CallToPrintStackTrace")
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        if (StatsCategoryCommand.SEPARATOR == null) {
-            List<String> returned = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                returned.add("-");
-            }
-            StatsCategoryCommand.SEPARATOR = new ChatComponentText(String.join(" ", returned));
-        }
-
         try {
             if (args.length < 1) {
-                StatsCategoryCommand.send("&cInvalid usage! &7" + this.getCommandUsage(sender)); return;
+                UChat.send("&cInvalid usage! &7" + this.getCommandUsage(sender), null, true); return;
             }
 
-            String player = args[0];
-            if (args[0].equalsIgnoreCase("me") || args[0].equalsIgnoreCase(".")) player = sender.getName();
+            String findingPlayer = args[0];
+            final boolean showAll = !args[0].startsWith(":");
+            findingPlayer = findingPlayer.replace(".", sender.getName());
+
+            if (args[0].startsWith(":"))
+                findingPlayer = findingPlayer.substring(1);
+
+            final String player = findingPlayer;
 
             StatsCategoryCommand command = null;
             if (args.length == 1) command = noArgumentCommand;
@@ -71,32 +80,71 @@ public class StatsCommand extends CommandBase {
             }
 
             if (command == null) {
-                StatsCategoryCommand.send("&cInvalid category: &8" + args[1] + "\n&cType &7/stats help &cfor help!");
+                UChat.send("&cInvalid category: &8" + args[1] + "\n&cType &7/stats help &cfor help!", null, true);
                 return;
             }
 
-            PlayerReply reply;
-            try {
-                UUID uuid = EntityPlayer.getOfflineUUID(args[0]);
-
-                reply = ExampleMod.API.getPlayerByUuid(uuid).get();
-            } catch (Exception exception) {
-                StatsCategoryCommand.send("&cFailed to send request to Hypixel API!", "&c" + exception);
-                exception.printStackTrace();
+            if (ExampleMod.API == null) {
+                UChat.send("&cThe Hypixel API has been disabled and cannot continue.\n&7&oThis is likely due to a previous fatal error!", null, true);
                 return;
             }
 
-            command.execute(sender, reply.getPlayer(), Arrays.copyOfRange(args, 1, args.length));
+            StatsCategoryCommand finalCommand = command;
+            UChat.send("&7&oLoading stats, please wait...", null, false);
+            CompletableFuture.runAsync(() -> {
+                PlayerReply playerReply;
+                StatusReply statusReply;
+                try {
+                    UUID uuid = Utils.isUuid(player) ? UUID.fromString(player) : UUIDGrabber.getUUIDOf(player);
+
+                    playerReply = ExampleMod.API.getPlayerByUuid(uuid).get(20, TimeUnit.SECONDS);
+                    statusReply = ExampleMod.API.getStatus(uuid).get(20, TimeUnit.SECONDS);
+                } catch (TimeoutException timeout) {
+                    UChat.send("&cFailed to send request to Hypixel API: &8Request timed out!", "&cException:\n&8" + timeout, true);
+                    timeout.printStackTrace();
+                    return;
+                } catch (RejectedExecutionException rejected) {
+                    UChat.send("&cFailed to send request to Hypixel API: &8Execution rejected by " + rejected.getStackTrace()[0].getClassName(), "&cException (fatal):\n&8" + rejected, true);
+                    rejected.printStackTrace();
+                    System.out.println("Rejected, aborting!");
+                    ExampleMod.shutdownApi();
+                    return;
+                } catch (Exception exception) {
+                    UChat.send("&cFailed to send request to Hypixel API!", "&cException (fatal):\n&8" + exception, true);
+                    exception.printStackTrace();
+                    System.out.println("Since a Hypixel API failure occurred, shutting down API for future use...");
+                    ExampleMod.shutdownApi();
+                    return;
+                }
+
+                try {
+                    IChatComponent text = new ChatComponentText("");
+                    if (showAll) {
+                        finalCommand.execute(sender, playerReply.getPlayer(), statusReply.getSession(), args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
+                    } else {
+                        finalCommand.oneLine(sender, playerReply.getPlayer(), statusReply.getSession(), args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
+                    }
+
+                    int index = 0;
+                    for (IChatComponent component : finalCommand.sentMessages) {
+                        text = text.appendSibling(component);
+                        if (index != finalCommand.sentMessages.size() - 1)
+                            text = text.appendSibling(UChat.chat(showAll ? "\n" : " &8|&f "));
+                        index++;
+                    }
+                    UChat.send(text, null, true);
+
+                    finalCommand.sentMessages.clear();
+
+                } catch (Exception exception) {
+                    UChat.send("&cFailed to display requested data!", "&cException:\n&8" + exception, true);
+                    exception.printStackTrace();
+                }
+            });
 
 
 
         } catch (Exception exception) {
-
-
-
-
-
-
             List<String> separator = new ArrayList<>();
             for (int i = 0; i < 80; i++) {
                 separator.add("§4§m");

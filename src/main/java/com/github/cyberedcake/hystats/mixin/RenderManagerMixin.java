@@ -1,6 +1,6 @@
 package com.github.cyberedcake.hystats.mixin;
 
-import com.github.cyberedcake.hystats.ColorCode;
+import com.github.cyberedcake.hystats.utils.ColorCode;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;

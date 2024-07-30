@@ -2,6 +2,7 @@ package com.github.cyberedcake.hystats.command;
 
 import com.github.cyberedcake.hystats.utils.UChat;
 import net.hypixel.api.reply.PlayerReply;
+import net.hypixel.api.reply.StatusReply;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.event.HoverEvent;
@@ -23,6 +24,8 @@ public abstract class StatsCategoryCommand {
     public final String description;
     public final String[] aliases;
 
+    List<IChatComponent> sentMessages = new ArrayList<>();
+
     public StatsCategoryCommand(String name, String usage, String description, String... aliases) {
         this.name = name;
         this.usage = usage;
@@ -30,25 +33,24 @@ public abstract class StatsCategoryCommand {
         this.aliases = aliases;
     }
 
-    public abstract void execute(ICommandSender sender, PlayerReply.Player player, String[] args);
+    public abstract void execute(ICommandSender sender, PlayerReply.Player player, StatusReply.Session session, String[] args);
 
-    public static void send(String msg) {
+    public abstract void oneLine(ICommandSender sender, PlayerReply.Player player, StatusReply.Session session, String[] args);
+
+    protected void send(String msg) {
         send(msg, null);
     }
 
-    public static void send(String msg, @Nullable String hover) {
-        List<String> separator = new ArrayList<>();
-        for (int i = 0; i < 80; i++) {
-            separator.add("§9§m");
+    protected void send(String msg, @Nullable String hover) {
+        IChatComponent component = UChat.chat(msg);
+        if (hover != null) {
+            component.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, UChat.chat(hover)));
         }
-        IChatComponent message = UChat.chat(msg);
-        message.setChatStyle(message.getChatStyle().setChatHoverEvent(
-                new HoverEvent(HoverEvent.Action.SHOW_TEXT, UChat.chat(hover))
-        ));
+        sentMessages.add(component);
+    }
 
-        Minecraft.getMinecraft().thePlayer.addChatMessage(
-                UChat.chat(String.join(" ", separator) + "\n").appendSibling(message).appendSibling(UChat.chat("\n" + String.join(" ", separator)))
-        );
+    protected void send(IChatComponent msg) {
+        sentMessages.add(msg);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.github.cyberedcake.hystats;
+package com.github.cyberedcake.hystats.utils;
 
 import java.util.Arrays;
 
