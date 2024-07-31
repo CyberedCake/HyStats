@@ -25,6 +25,7 @@ public class BasicStats extends StatsCategoryCommand {
     @Override
     public void execute(ICommandSender sender, String display, PlayerReply.Player player, StatusReply.Session session, String[] args) {
         send("Stats of " + display);
+        send(" ");
         send("Hypixel Level: &6" + Utils.formatDouble(player.getNetworkLevel()));
         send("Achievement Points: &e" + Utils.formatDouble(player.getIntProperty("achievementPoints", 0)));
         send("Karma: &d" + Utils.formatDouble(player.getKarma()));

@@ -2,6 +2,7 @@ package com.github.cyberedcake.hystats.command;
 
 import com.github.cyberedcake.hystats.ExampleMod;
 import com.github.cyberedcake.hystats.categories.BasicStats;
+import com.github.cyberedcake.hystats.categories.BedWars;
 import com.github.cyberedcake.hystats.categories.Socials;
 import com.github.cyberedcake.hystats.exceptions.NoHypixelPlayerException;
 import com.github.cyberedcake.hystats.exceptions.UuidNotExist;
@@ -28,6 +29,7 @@ public class StatsCommand extends CommandBase {
     public StatsCommand() {
         commands.add(new BasicStats());
         commands.add(new Socials());
+        commands.add(new BedWars());
 
         noArgumentCommand = commands.stream().filter(cmd -> cmd.getClass() == BasicStats.class).findFirst().orElseThrow(() -> new RuntimeException("No basic stats command!"));
     }
@@ -128,7 +130,7 @@ public class StatsCommand extends CommandBase {
                     if (showAll) {
                         finalCommand.execute(sender, display, api.player, api.session, args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
                     } else {
-                        finalCommand.oneLine(sender, display, api.player, api.session, args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
+                        finalCommand.oneLine(sender, display.replace("YOUTUBE", "YT"), api.player, api.session, args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
                     }
 
                     int index = 0;

@@ -36,7 +36,7 @@ public class CachedApiCall {
     public static CachedApiCall grab(String username) throws ExecutionException, InterruptedException, TimeoutException, HyStatsError {
         CachedApiCall api;
         if (isCached(username)) {
-            api = cached.stream().filter(c -> c.username.equalsIgnoreCase(username)).findFirst().orElseThrow(() -> new RuntimeException("Failed to retrieve cached data for " + username));
+            api = cached.stream().filter(c -> c.username != null && c.username.equalsIgnoreCase(username)).findFirst().orElseThrow(() -> new RuntimeException("Failed to retrieve cached data for " + username));
         } else {
             api = grab(username, Utils.isUuid(username) ? UUID.fromString(username) : UUIDGrabber.getUUIDOf(username));
         }

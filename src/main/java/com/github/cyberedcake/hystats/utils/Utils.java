@@ -14,10 +14,14 @@ public class Utils {
         return player.hasProperty(property) ? player.getProperty(property).getAsString() : "null";
     }
 
-    public static String formatDouble(double d) {
-        DecimalFormat formatter = new DecimalFormat("#,###");
+    public static String formatDouble(double d, String pattern) {
+        DecimalFormat formatter = new DecimalFormat(pattern);
         formatter.setRoundingMode(RoundingMode.FLOOR);
         return formatter.format(d);
+    }
+
+    public static String formatDouble(double d) {
+        return formatDouble(d, "#,###");
     }
 
     public static boolean isUuid(String input) {
