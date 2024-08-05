@@ -39,14 +39,17 @@ public class UChat {
 
         if (hasSeparator) {
             List<String> separator = new ArrayList<>();
-            for (int i = 0; i < 80; i++) {
-                separator.add("§9§m");
+            int amount = (int) ((int) (Minecraft.getMinecraft().gameSettings.chatWidth * Minecraft.getMinecraft().fontRendererObj.getCharWidth('-')) * (52.22 / 6));
+            System.out.println("Amount of separators: " + amount);
+            System.out.println(Minecraft.getMinecraft().gameSettings.chatWidth + " * " + Minecraft.getMinecraft().fontRendererObj.getCharWidth('-') + " * (" + (52.22 / 6) + ")");
+            for (int i = 0; i < amount; i++) {
+                separator.add("-");
             }
-            msg = UChat.chat(String.join(" ", separator))
+            msg = UChat.chat("§9§m" + String.join("", separator))
                     .appendSibling(UChat.chat("\n"))
                     .appendSibling(msg)
                     .appendSibling(UChat.chat("\n"))
-                    .appendSibling(UChat.chat(String.join(" ", separator)));
+                    .appendSibling(UChat.chat("§9§m" + String.join("", separator)));
         }
 
         send(msg);

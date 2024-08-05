@@ -1,9 +1,10 @@
 package com.github.cyberedcake.hystats.hypixel;
 
-import com.github.cyberedcake.hystats.ExampleMod;
+import com.github.cyberedcake.hystats.HyStatsMain;
 import com.github.cyberedcake.hystats.exceptions.HyStatsError;
 import com.github.cyberedcake.hystats.exceptions.NoHypixelPlayerException;
 import com.github.cyberedcake.hystats.exceptions.UuidNotExist;
+import com.github.cyberedcake.hystats.hypixel.ranks.HypixelRank;
 import com.github.cyberedcake.hystats.utils.UUIDGrabber;
 import com.github.cyberedcake.hystats.utils.Utils;
 import net.hypixel.api.reply.PlayerReply;
@@ -24,9 +25,9 @@ public class CachedApiCall {
         for (CachedApiCall call : cached) {
             if (!username.equalsIgnoreCase(call.username)) continue;
 
-            if (call.error == null) return true;
+            if (System.currentTimeMillis() - call.updated > 60 * 1_000) return false;
 
-            if (System.currentTimeMillis() - call.updated > 60 * 1_000) break;
+            if (call.error == null) return true;
 
             return true;
         }
@@ -48,6 +49,7 @@ public class CachedApiCall {
     }
 
     public static CachedApiCall grab(String username, UUID uuid) throws ExecutionException, InterruptedException, TimeoutException, HyStatsError {
+        System.out.println("Found uncached api call, calling a new one...");
         CachedApiCall api = null;
         for (CachedApiCall call : cached) {
             if (uuid == null) break;
@@ -69,8 +71,9 @@ public class CachedApiCall {
             throw api.error;
         }
 
-        PlayerReply playerReply = ExampleMod.API.getPlayerByUuid(uuid).get(20, TimeUnit.SECONDS);
-        StatusReply statusReply = ExampleMod.API.getStatus(uuid).get(20, TimeUnit.SECONDS);
+        System.out.println("Calling Hypixel API...");
+        PlayerReply playerReply = HyStatsMain.API.getPlayerByUuid(uuid).get(20, TimeUnit.SECONDS);
+        StatusReply statusReply = HyStatsMain.API.getStatus(uuid).get(20, TimeUnit.SECONDS);
 
         if (!playerReply.getPlayer().exists()) {
             api.error = new NoHypixelPlayerException(username);
@@ -78,6 +81,8 @@ public class CachedApiCall {
             cache(api);
             throw api.error;
         }
+
+        System.out.println("Received response: player=" + playerReply.isSuccess() + ", status=" + statusReply.isSuccess());
 
         api.player = playerReply.getPlayer();
         api.username = api.player.getName();
@@ -99,6 +104,8 @@ public class CachedApiCall {
         }
 
         cached.add(newCall);
+
+        System.out.println("Cached data for " + newCall.uuid + " (" + newCall.username + ")");
     }
 
 

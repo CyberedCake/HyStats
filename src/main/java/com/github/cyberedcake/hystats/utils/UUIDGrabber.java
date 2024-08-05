@@ -25,7 +25,7 @@ public class UUIDGrabber {
             InputStream input = new URL(url).openStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
-            JsonObject obj = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonObject obj = new JsonParser().parse(reader).getAsJsonObject();
             String stringUuid = convertUUID(obj.get("id").getAsString());
             UUID returned = UUID.fromString(stringUuid);
 

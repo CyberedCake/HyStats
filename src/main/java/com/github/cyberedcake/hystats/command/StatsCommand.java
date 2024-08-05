@@ -1,6 +1,6 @@
 package com.github.cyberedcake.hystats.command;
 
-import com.github.cyberedcake.hystats.ExampleMod;
+import com.github.cyberedcake.hystats.HyStatsMain;
 import com.github.cyberedcake.hystats.categories.BasicStats;
 import com.github.cyberedcake.hystats.categories.BedWars;
 import com.github.cyberedcake.hystats.categories.Socials;
@@ -8,7 +8,8 @@ import com.github.cyberedcake.hystats.exceptions.NoHypixelPlayerException;
 import com.github.cyberedcake.hystats.exceptions.UuidNotExist;
 import com.github.cyberedcake.hystats.hypixel.CachedApiCall;
 import com.github.cyberedcake.hystats.utils.UChat;
-import com.github.cyberedcake.hystats.hypixel.HypixelRank;
+import com.github.cyberedcake.hystats.hypixel.ranks.HypixelRank;
+import com.github.cyberedcake.hystats.utils.Utils;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -81,13 +82,14 @@ public class StatsCommand extends CommandBase {
                 return;
             }
 
-            if (ExampleMod.API == null) {
+            if (HyStatsMain.API == null) {
                 UChat.send("&cThe Hypixel API has been disabled and cannot continue.\n&7&oThis is likely due to a previous fatal error!", null, true);
                 return;
             }
 
-            if (player.length() > 16
-                    || !StringUtils.isAlphanumeric(player.replace("_", ""))
+            if ((player.length() > 16
+                    || !StringUtils.isAlphanumeric(player.replace("_", "")))
+                    && !Utils.isUuid(player)
             ) {
                 UChat.send("&cThat player does not exist!", null, true); return;
             }
@@ -96,6 +98,7 @@ public class StatsCommand extends CommandBase {
                 UChat.send("&7&oLoading stats, please wait...", null, false);
 
             StatsCategoryCommand finalCommand = command;
+            System.out.println("Loading stats for " + player + "...");
             CompletableFuture.runAsync(() -> {
                 CachedApiCall api;
                 try {
@@ -114,13 +117,13 @@ public class StatsCommand extends CommandBase {
                     UChat.send("&cFailed to send request to Hypixel API: &8Execution rejected by " + rejected.getStackTrace()[0].getClassName(), "&cException (fatal):\n&8" + rejected, true);
                     rejected.printStackTrace();
                     System.out.println("Rejected, aborting!");
-                    ExampleMod.shutdownApi();
+                    HyStatsMain.shutdownApi();
                     return;
                 } catch (Exception exception) {
                     UChat.send("&cFailed to send request to Hypixel API!", "&cException (fatal):\n&8" + exception, true);
                     exception.printStackTrace();
                     System.out.println("Since a Hypixel API failure occurred, shutting down API for future use...");
-                    ExampleMod.shutdownApi();
+                    HyStatsMain.shutdownApi();
                     return;
                 }
 
@@ -148,17 +151,20 @@ public class StatsCommand extends CommandBase {
                     UChat.send("&cFailed to display requested data!", "&cException:\n&8" + exception, true);
                     exception.printStackTrace();
                 }
-            });
-
-
+            })
+                    .exceptionally(e -> {
+                        UChat.send("&cFailed to execute HyStats command!", "&cException:\n&8" + e, true);
+                        e.printStackTrace();
+                        return null;
+                    });
 
         } catch (Exception exception) {
             List<String> separator = new ArrayList<>();
             for (int i = 0; i < 80; i++) {
-                separator.add("§4§m");
+                separator.add("-");
             }
             exception.printStackTrace();
-            sender.addChatMessage(new ChatComponentText(String.join(" ", separator)));
+            sender.addChatMessage(new ChatComponentText("§4§m" + String.join("", separator)));
             sender.addChatMessage(new ChatComponentText("§c§lAN ERROR OCCURRED!"));
             sender.addChatMessage(new ChatComponentText("§e-> §fWhile showing stats data"));
             sender.addChatMessage(new ChatComponentText("§e-> §fSpecific exception: §8" + exception));
@@ -166,7 +172,7 @@ public class StatsCommand extends CommandBase {
             sender.addChatMessage(new ChatComponentText("§a§lPLEASE CREATE AN ISSUE REPORT!"));
             sender.addChatMessage(new ChatComponentText("§e-> §fGitHub: §bgithub.com/CyberedCake/HyStats"));
             sender.addChatMessage(new ChatComponentText("§e-> §f§nInclude your most recent log file!"));
-            sender.addChatMessage(new ChatComponentText(String.join(" ", separator)));
+            sender.addChatMessage(new ChatComponentText("§4§m" + String.join("", separator)));
         }
     }
 

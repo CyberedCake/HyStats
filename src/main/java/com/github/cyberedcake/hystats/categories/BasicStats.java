@@ -4,16 +4,20 @@ import com.github.cyberedcake.hystats.command.StatsCategoryCommand;
 import com.github.cyberedcake.hystats.utils.UChat;
 import com.github.cyberedcake.hystats.utils.Time;
 import com.github.cyberedcake.hystats.utils.Utils;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.IChatComponent;
+import scala.collection.parallel.mutable.ParArray;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 public class BasicStats extends StatsCategoryCommand {
 
@@ -33,8 +37,9 @@ public class BasicStats extends StatsCategoryCommand {
                 "&6First Login:\n&f" + player.getFirstLoginDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm:ss z"))
                 );
         JsonObject object = player.getObjectProperty("socialMedia.links");
-        if (object != null && !object.asMap().isEmpty()) {
-            IChatComponent component = UChat.chat("Social Media: &7" + object.asMap().size() + " linked account" + (object.asMap().size() == 1 ? "" : "s") + " ... click to view!");
+        Map<String, String> map = new Gson().fromJson(object, new TypeToken<Map<String, String>>() {}.getType());
+        if (object != null && !map.isEmpty()) {
+            IChatComponent component = UChat.chat("Social Media: &7" + map.size() + " linked account" + (map.size() == 1 ? "" : "s") + " ... click to view!");
             component.getChatStyle()
                     .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, UChat.chat("&eClick to view " + display + "&e'" + (player.getName().endsWith("s") ? "" : "s") + " social media!")))
                     .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hystats " + player.getName() + " socials"));

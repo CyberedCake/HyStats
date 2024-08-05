@@ -1,13 +1,18 @@
 package com.github.cyberedcake.hystats.command;
 
-import com.github.cyberedcake.hystats.ExampleMod;
+import com.github.cyberedcake.hystats.HyStatsMain;
 import com.github.cyberedcake.hystats.utils.UChat;
+import com.github.cyberedcake.hystats.utils.UUIDGrabber;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,13 +44,40 @@ public class DebugCommand extends CommandBase {
             }
 
             if (args[0].equalsIgnoreCase("--reload-api")) {
-                if (ExampleMod.API != null) {
+                if (HyStatsMain.API != null) {
                     send("&7&oShutting down API...");
-                    ExampleMod.shutdownApi();
+                    HyStatsMain.shutdownApi();
                 }
 
-                ExampleMod.loadApi();
+                HyStatsMain.loadApi();
                 send("&aReloaded the Hypixel API!");
+            } else if (args[0].equalsIgnoreCase("--send-raw")) {
+
+                if (args.length < 2) {
+                    send("&cMust provide text!");
+                    return;
+                }
+
+                sender.addChatMessage(UChat.chat(String.join(" ", Arrays.copyOfRange(args, 1, args.length))));
+
+            } else if (args[0].equalsIgnoreCase("--uuid-of")) {
+
+                if (args.length < 2) {
+                    send("&cMust provide username!");
+                    return;
+                }
+
+                UUID uuid = UUIDGrabber.getUUIDOf(args[1]);
+                if (uuid == null) {
+                    send("&cPlayer does not exist: " + args[1]);
+                    return;
+                }
+
+                IChatComponent component = UChat.chat("&6&lHyStats Debugger: &f" + uuid.toString());
+                component.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, UChat.chat("&eClick here to copy &b" + uuid.toString() + "&e!")));
+                component.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, uuid.toString()));
+                UChat.send(component);
+
             } else {
                 send("&cInvalid parameter!");
             }

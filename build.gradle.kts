@@ -80,10 +80,10 @@ dependencies {
     }
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT")
 
-    // If you don't want to log in with your real minecraft account, remove this line
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.1")
 
-    implementation("net.hypixel:hypixel-api-transport-apache:4.4")
+    shadowImpl("net.hypixel:hypixel-api-transport-apache:4.4")
+    shadowImpl("com.google.code.gson:gson:2.11.0")
 }
 
 // Tasks:

@@ -4,8 +4,10 @@ import com.github.cyberedcake.hystats.command.StatsCategoryCommand;
 import com.github.cyberedcake.hystats.utils.SocialMedia;
 import com.github.cyberedcake.hystats.utils.UChat;
 import com.github.cyberedcake.hystats.utils.Utils;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
 import net.minecraft.command.ICommandSender;
@@ -24,7 +26,8 @@ public class Socials extends StatsCategoryCommand {
     @Override
     public void execute(ICommandSender sender, String displayName, PlayerReply.Player player, StatusReply.Session session, String[] args) {
         JsonObject object = player.getObjectProperty("socialMedia.links");
-        if (object == null || object.asMap().isEmpty()) {
+        Map<String, String> map = new Gson().fromJson(object, new TypeToken<Map<String, String>>() {}.getType());
+        if (object == null || map.isEmpty()) {
             send(displayName + " &chas no social media set!"); return;
         }
 
@@ -37,7 +40,8 @@ public class Socials extends StatsCategoryCommand {
     @Override
     public void oneLine(ICommandSender sender, String displayName, PlayerReply.Player player, StatusReply.Session session, String[] args) {
         JsonObject object = player.getObjectProperty("socialMedia.links");
-        if (object == null || object.asMap().isEmpty()) {
+        Map<String, String> map = new Gson().fromJson(object, new TypeToken<Map<String, String>>() {}.getType());
+        if (object == null || map.isEmpty()) {
             send(displayName + " &chas no social media set!"); return;
         }
 
@@ -47,9 +51,10 @@ public class Socials extends StatsCategoryCommand {
     }
 
     private void socials(boolean oneLine, String displayName, PlayerReply.Player player, JsonObject object) {
-        for (Map.Entry<String, JsonElement> socialEntry : object.asMap().entrySet()) {
+        Map<String, String> map = new Gson().fromJson(object, new TypeToken<Map<String, String>>() {}.getType());
+        for (Map.Entry<String, String> socialEntry : map.entrySet()) {
             String name = socialEntry.getKey();
-            String link = socialEntry.getValue().getAsString();
+            String link = socialEntry.getValue();
             SocialMedia social = SocialMedia.getSocial(name);
             boolean isLink = Utils.isUrl(link);
 
@@ -70,7 +75,7 @@ public class Socials extends StatsCategoryCommand {
                         .setChatHoverEvent(hover)
                         .setChatClickEvent(click);
             } else {
-                component = UChat.chat((social == null ? "&7" + name : social.display) + "&f: &b" + link.replace("https://", ""));
+                component = UChat.chat((social == null ? "&7" + name : social.display) + "&f: &a" + link.replace("https://", ""));
                 component.getChatStyle()
                         .setChatHoverEvent(hover)
                         .setChatClickEvent(click);

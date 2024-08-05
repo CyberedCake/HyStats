@@ -1,4 +1,4 @@
-package com.github.cyberedcake.hystats.hypixel;
+package com.github.cyberedcake.hystats.hypixel.ranks;
 
 import com.github.cyberedcake.hystats.utils.ColorCode;
 import net.hypixel.api.reply.PlayerReply;
@@ -23,10 +23,18 @@ public enum HypixelRank {
 
     GAME_MASTER("&2[GM]"),
 
-    ADMIN("&c[ADMIN]");
+    ADMIN("&c[ADMIN]"),
+
+    CUSTOM((RankMeta) null);
 
     public static HypixelRank getRank(PlayerReply.Player player) {
         try {
+            SpecialHypixelRank specialRank = SpecialHypixelRank.rankOf(player.getUuid());
+            if (specialRank != null) {
+                HypixelRank rank = CUSTOM;
+                rank.meta = RankMeta.of(specialRank.getPrefix());
+                return rank;
+            }
             return HypixelRank.valueOf(player.getHighestRank().replace("SUPERSTAR", "MVP_PLUS_PLUS"));
         } catch (Exception exception) {
             System.out.println("An error occurred getting player rank of " + player.getName() + ": " + exception
@@ -42,14 +50,18 @@ public enum HypixelRank {
         }
     }
 
-    private final String display;
+    private RankMeta meta;
 
     HypixelRank(String display) {
-        this.display = display;
+        this(RankMeta.of(display));
+    }
+
+    HypixelRank(RankMeta meta) {
+        this.meta = meta;
     }
 
     public String format(PlayerReply.Player player) {
-        String prefix = display;
+        String prefix = meta.getPrefix();
         if (prefix.contains("{1}")) {
             prefix = prefix.replace("{1}", "&" + ColorCode.valueOf(player.getStringProperty("rankPlusColor", "RED")).getCode());
         }
