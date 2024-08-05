@@ -27,6 +27,7 @@ public class SpecialHypixelRank {
     }
 
     public static void createSpecialHypixelRanks() throws HyStatsError {
+        if (!ranks.isEmpty()) ranks.clear();
         try {
             URL url = new URI(specialRanks).toURL();
 

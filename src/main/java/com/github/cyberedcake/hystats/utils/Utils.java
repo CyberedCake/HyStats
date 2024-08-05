@@ -15,6 +15,9 @@ public class Utils {
     }
 
     public static String formatDouble(double d, String pattern) {
+        if (Double.isNaN(d) || Double.isInfinite(d)) {
+            return "&cN/A";
+        }
         DecimalFormat formatter = new DecimalFormat(pattern);
         formatter.setRoundingMode(RoundingMode.FLOOR);
         return formatter.format(d);

@@ -1,11 +1,10 @@
 package com.github.cyberedcake.hystats.categories;
 
 import com.github.cyberedcake.hystats.command.StatsCategoryCommand;
-import com.github.cyberedcake.hystats.utils.SocialMedia;
+import com.github.cyberedcake.hystats.hypixel.SocialMedia;
 import com.github.cyberedcake.hystats.utils.UChat;
 import com.github.cyberedcake.hystats.utils.Utils;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.hypixel.api.reply.PlayerReply;

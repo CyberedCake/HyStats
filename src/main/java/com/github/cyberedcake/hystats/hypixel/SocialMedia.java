@@ -1,4 +1,4 @@
-package com.github.cyberedcake.hystats.utils;
+package com.github.cyberedcake.hystats.hypixel;
 
 public enum SocialMedia {
     YOUTUBE("&cY&fT", "&cYou&fTube", "YouTube"),
@@ -7,7 +7,8 @@ public enum SocialMedia {
     DISCORD("&3DISC", "&3Discord", "Discord"),
     INSTAGRAM("&dI&6T&eG", "&dIns&6tag&eram", "Instagram"),
     HYPIXEL("&6HY", "&6Hypixel Forums", "Hypixel Forums"),
-    TIKTOK("&bT&cT", "&bTik&cTok", "TikTok");
+    TIKTOK("&bT&cT", "&bTik&cTok", "TikTok"),
+    MIXER("&fM&3I&bX", "&fMi&3x&ber", "Mixer");
 
     public static SocialMedia getSocial(String input) {
         try {
