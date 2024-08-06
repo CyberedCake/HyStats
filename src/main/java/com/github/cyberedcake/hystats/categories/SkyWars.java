@@ -1,5 +1,6 @@
 package com.github.cyberedcake.hystats.categories;
 
+import com.github.cyberedcake.hystats.command.GameStats;
 import com.github.cyberedcake.hystats.command.StatsCategoryCommand;
 import com.github.cyberedcake.hystats.hypixel.BedWarsPrestige;
 import net.hypixel.api.reply.PlayerReply;
@@ -14,37 +15,38 @@ import static com.github.cyberedcake.hystats.utils.Utils.formatDouble;
 public class SkyWars extends StatsCategoryCommand {
 
     public SkyWars() {
-        super("skywars", "skywars", "View a Hypixel user's SkyWars stats", "sw");
+        super("skywars", "stats.SkyWars", "View a Hypixel user's SkyWars statistics.", "sw");
     }
 
     @Override
-    public void execute(ICommandSender sender, String displayName, PlayerReply.Player player, StatusReply.Session session, String[] args) {
-        String level = player.getStringProperty("stats.SkyWars.levelFormatted", "0✰");
+    public void execute(ICommandSender sender, GameStats stats, boolean oneLine, String[] args) {
+        String level = stats.getProperty("levelFormatted", "0✰");
 
-        double wins = player.getDoubleProperty("stats.Bedwars.wins_bedwars", 0D);
-        double losses = player.getDoubleProperty("stats.Bedwars.losses_bedwars", 0D);
+        double wins = stats.getDoubleProperty("wins", 0D);
+        double losses = stats.getDoubleProperty("losses", 0D);
 
-        double finalKills = player.getDoubleProperty("stats.Bedwars.final_kills_bedwars", 0D);
-        double finalDeaths = player.getDoubleProperty("stats.Bedwars.final_deaths_bedwars", 0D);
+        double kills = stats.getDoubleProperty("kills", 0D);
+        double deaths = stats.getDoubleProperty("deaths", 0D);
 
-        int winstreak = player.getIntProperty("stats.Bedwars.winstreak", -1);
+        int winstreak = stats.getIntProperty("win_streak", -1);
 
-        send("Bed Wars Stats of " + displayName);
+        if (oneLine) {
+            send(stats.getUser());
+            send("Level: &7" + level);
+            send("WLR: &e" + formatDouble(wins / losses, "#,###.00"), "&fWins/Losses:\n&2" + formatDouble(wins) + "&7/&4" + formatDouble(losses));
+            send("KDR: &6" + formatDouble(kills / deaths, "#,###.00"), "&fKills/Deaths:\n&a" + formatDouble(kills) + "&7/&c" + formatDouble(deaths));
+            send("WS: &d" + (winstreak == -1 ? "&cN/A" : "&d" + winstreak), winstreak == -1 ? "&cThis user has disabled Winstreak visibility!" : null);
+            return;
+        }
+
+        send("SkyWars Stats of " + stats.getUser());
         send(" ");
-        send("Level: &7" + BedWarsPrestige.format(star),
-                "&6Prestige:\n&f" + Arrays.stream(prestige.name().toLowerCase().split("_"))
-                        .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
-                        .collect(Collectors.joining(" "))
-        );
+        send("Level: &7" + level);
         send("Wins/Losses: &2" + formatDouble(wins) + " &7/ &4" + formatDouble(losses) + " &f(WLR: &6" + formatDouble((wins / losses), "#,###.00") + "&f)");
-        send("Final Kills/Deaths: &a" + formatDouble(finalKills) + " &7/ &c" + formatDouble(finalDeaths) + " &f(FKDR: &6" + formatDouble(finalKills / finalDeaths, "#,###.00") + "&f)");
-        send("Kills: &e" + formatDouble(player.getIntProperty("stats.Bedwars.kills_bedwars", 0)));
-        send("Coins: &6" + formatDouble(player.getIntProperty("stats.Bedwars.coins", 0)));
+        send("Kills/Deaths: &a" + formatDouble(kills) + " &7/ &c" + formatDouble(deaths) + " &f(KDR: &6" + formatDouble(kills / deaths, "#,###.00") + "&f)");
+        send("Souls: &b" + formatDouble(stats.getIntProperty("souls", 0)));
+        send("Heads: &5" + formatDouble(stats.getIntProperty("heads", 0)));
+        send("Coins/Tokens: &6" + formatDouble(stats.getIntProperty("coins", 0)) + " &7/ &2" + formatDouble(stats.getIntProperty("cosmetic_tokens", 0)));
         send("Winstreak: &d" + (winstreak == -1 ? "&cDisabled" : winstreak), winstreak == -1 ? "&cThis user has disabled Winstreak visibility!" : null);
-    }
-
-    @Override
-    public void oneLine(ICommandSender sender, String displayName, PlayerReply.Player player, StatusReply.Session session, String[] args) {
-
     }
 }

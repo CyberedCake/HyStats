@@ -96,4 +96,21 @@ public class Time {
         }
     }
 
+    public static String formatBasicSeconds(long number) {
+        if (number < 0)
+            return "None";
+
+        number = number * 1000L;
+
+        long hours   = (number / Time.ONE_HOUR);
+        long minutes = ((number % Time.ONE_HOUR) / Time.ONE_MINUTE);
+        long seconds = ((number % Time.ONE_MINUTE) / Time.ONE_SECOND);
+
+        return (hours != 0 ? hours + ":" : "") + (isOneDigit(minutes) ? "0" : "") + minutes + ":" + (isOneDigit(seconds) ? "0" : "") + seconds;
+    }
+
+    private static boolean isOneDigit(long yourLong) {
+        return yourLong >= (long) 0 && yourLong <= (long) 9;
+    }
+
 }

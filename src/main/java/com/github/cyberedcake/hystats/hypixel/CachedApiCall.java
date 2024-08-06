@@ -3,7 +3,7 @@ package com.github.cyberedcake.hystats.hypixel;
 import com.github.cyberedcake.hystats.HyStatsMain;
 import com.github.cyberedcake.hystats.exceptions.HyStatsError;
 import com.github.cyberedcake.hystats.exceptions.NoHypixelPlayerException;
-import com.github.cyberedcake.hystats.exceptions.UuidNotExist;
+import com.github.cyberedcake.hystats.exceptions.NoUserException;
 import com.github.cyberedcake.hystats.hypixel.ranks.HypixelRank;
 import com.github.cyberedcake.hystats.utils.UUIDGrabber;
 import com.github.cyberedcake.hystats.utils.Utils;
@@ -65,7 +65,7 @@ public class CachedApiCall {
         }
 
         if (uuid == null) {
-            api.error = new UuidNotExist(username);
+            api.error = new NoUserException(username);
             api.username = username;
             cache(api);
             throw api.error;

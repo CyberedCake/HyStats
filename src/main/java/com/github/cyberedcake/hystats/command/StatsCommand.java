@@ -1,11 +1,9 @@
 package com.github.cyberedcake.hystats.command;
 
 import com.github.cyberedcake.hystats.HyStatsMain;
-import com.github.cyberedcake.hystats.categories.BasicStats;
-import com.github.cyberedcake.hystats.categories.BedWars;
-import com.github.cyberedcake.hystats.categories.Socials;
+import com.github.cyberedcake.hystats.categories.*;
 import com.github.cyberedcake.hystats.exceptions.NoHypixelPlayerException;
-import com.github.cyberedcake.hystats.exceptions.UuidNotExist;
+import com.github.cyberedcake.hystats.exceptions.NoUserException;
 import com.github.cyberedcake.hystats.hypixel.CachedApiCall;
 import com.github.cyberedcake.hystats.utils.UChat;
 import com.github.cyberedcake.hystats.hypixel.ranks.HypixelRank;
@@ -31,6 +29,8 @@ public class StatsCommand extends CommandBase {
         commands.add(new BasicStats());
         commands.add(new Socials());
         commands.add(new BedWars());
+        commands.add(new SkyWars());
+        commands.add(new MurderMystery());
 
         noArgumentCommand = commands.stream().filter(cmd -> cmd.getClass() == BasicStats.class).findFirst().orElseThrow(() -> new RuntimeException("No basic stats command!"));
     }
@@ -103,7 +103,7 @@ public class StatsCommand extends CommandBase {
                 CachedApiCall api;
                 try {
                     api = CachedApiCall.grab(player);
-                } catch (UuidNotExist notExist) {
+                } catch (NoUserException notExist) {
                     UChat.send("&cThat player does not exist!", "&cException:\n&8" + notExist, true);
                     return;
                 } catch (NoHypixelPlayerException hypixelPlayerException) {
@@ -129,12 +129,15 @@ public class StatsCommand extends CommandBase {
 
                 try {
                     IChatComponent text = new ChatComponentText("");
-                    String display = HypixelRank.getRank(api.player).format(api.player);
-                    if (showAll) {
-                        finalCommand.execute(sender, display, api.player, api.session, args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
-                    } else {
-                        finalCommand.oneLine(sender, display.replace("YOUTUBE", "YT"), api.player, api.session, args.length > 2 ? Arrays.copyOfRange(args, 1, args.length) : args);
-                    }
+                    finalCommand.execute(sender,
+                            new GameStats(
+                                    finalCommand.prefix,
+                                    api.player,
+                                    api.session,
+                                    HypixelRank.getRank(api.player).format(api.player)
+                            ),
+                            !showAll,
+                            args);
 
                     int index = 0;
                     for (IChatComponent component : finalCommand.sentMessages) {

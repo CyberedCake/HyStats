@@ -20,22 +20,20 @@ public abstract class StatsCategoryCommand {
     public static IChatComponent SEPARATOR = null;
 
     public final String name;
-    public final String usage;
+    public final @Nullable String prefix;
     public final String description;
     public final String[] aliases;
 
     List<IChatComponent> sentMessages = new ArrayList<>();
 
-    public StatsCategoryCommand(String name, String usage, String description, String... aliases) {
+    public StatsCategoryCommand(String name, @Nullable String prefix, String description, String... aliases) {
         this.name = name;
-        this.usage = usage;
+        this.prefix = prefix;
         this.description = description;
         this.aliases = aliases;
     }
 
-    public abstract void execute(ICommandSender sender, String displayName, PlayerReply.Player player, StatusReply.Session session, String[] args);
-
-    public abstract void oneLine(ICommandSender sender, String displayName, PlayerReply.Player player, StatusReply.Session session, String[] args);
+    public abstract void execute(ICommandSender sender, GameStats stats, boolean oneLine, String[] args);
 
     protected void send(String msg) {
         send(msg, null);
