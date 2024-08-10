@@ -19,13 +19,19 @@ import java.util.concurrent.TimeoutException;
 
 public class CachedApiCall {
 
+    private static final int EXPIRATION_TIME = 60; // seconds
+
+
     public static List<CachedApiCall> cached = new ArrayList<>();
 
     public static boolean isCached(String username) {
         for (CachedApiCall call : cached) {
-            if (!username.equalsIgnoreCase(call.username)) continue;
+            if (
+                    (Utils.isUuid(username) && call.uuid != null && call.uuid.toString().equalsIgnoreCase(username))
+                ||
+                    !username.equalsIgnoreCase(call.username)) continue;
 
-            if (System.currentTimeMillis() - call.updated > 60 * 1_000) return false;
+            if (System.currentTimeMillis() - call.updated > EXPIRATION_TIME * 1_000) return false;
 
             if (call.error == null) return true;
 
@@ -56,7 +62,7 @@ public class CachedApiCall {
             if (call.uuid == null) continue;
             if (!uuid.equals(call.uuid)) continue;
 
-            api = (System.currentTimeMillis() - call.updated <= 60 * 1_000) ? call : null;
+            api = (System.currentTimeMillis() - call.updated <= EXPIRATION_TIME * 1_000) ? call : null;
             break;
         }
 

@@ -1,6 +1,6 @@
 package com.github.cyberedcake.hystats.exceptions;
 
-public class HyStatsError extends Exception {
+public class HyStatsError extends RuntimeException {
 
     public HyStatsError(String message) {
         super(message);
@@ -12,6 +12,11 @@ public class HyStatsError extends Exception {
         super(message, cause);
         System.out.println("An error occurred within HyStats: " + this.toString() + " caused by " + cause.toString());
         System.out.println("(" + message + ")");
+    }
+
+    public HyStatsError(Exception cause) {
+        super(cause);
+        System.out.println("An error occurred within HyStats: " + this.toString() + " caused by " + cause.toString());
     }
 
 }
