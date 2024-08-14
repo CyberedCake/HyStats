@@ -30,10 +30,13 @@ public class SpecialHypixelRank {
         if (!ranks.isEmpty()) ranks.clear();
         try {
             URL url = new URI(specialRanks).toURL();
+            System.out.println("Loading special ranks from " + specialRanks);
 
             InputStreamReader inputStreamReader = new InputStreamReader(url.openStream());
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            JsonArray array = JsonParser.parseReader(bufferedReader).getAsJsonArray();
+            JsonElement generalElement = JsonParser.parseReader(bufferedReader);
+            System.out.println("Found special rank JSON data: " + generalElement.toString());
+            JsonArray array = generalElement.getAsJsonArray();
 
             for (JsonElement element : array.asList()) {
                 JsonObject obj = element.getAsJsonObject();
@@ -46,6 +49,8 @@ public class SpecialHypixelRank {
 
                 ranks.add(rank);
             }
+
+            System.out.println("Found " + ranks.size() + " special ranks!");
         } catch (Exception exception) {
             throw new SpecialRanksFailureException(exception);
         }

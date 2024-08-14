@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -38,21 +39,25 @@ public class UChat {
             ));
 
         if (hasSeparator) {
-            List<String> separator = new ArrayList<>();
-//            int amount = (int) ((int) (Minecraft.getMinecraft().gameSettings.chatWidth * Minecraft.getMinecraft().fontRendererObj.getCharWidth('-')) * (52.22 / 6));
-//            System.out.println("Amount of separators: " + amount);
-//            System.out.println(Minecraft.getMinecraft().gameSettings.chatWidth + " * " + Minecraft.getMinecraft().fontRendererObj.getCharWidth('-') + " * (" + (52.22 / 6) + ")");
-            for (int i = 0; i < 50; i++) {
-                separator.add("-");
-            }
-            msg = UChat.chat("§9§m" + String.join("", separator))
+            msg = UChat.chat(getSeparator())
                     .appendSibling(UChat.chat("\n"))
                     .appendSibling(msg)
                     .appendSibling(UChat.chat("\n"))
-                    .appendSibling(UChat.chat("§9§m" + String.join("", separator)));
+                    .appendSibling(UChat.chat(getSeparator()));
         }
 
         send(msg);
+    }
+
+    public static @NotNull String getSeparator() {
+        List<String> separator = new ArrayList<>();
+//            int amount = (int) ((int) (Minecraft.getMinecraft().gameSettings.chatWidth * Minecraft.getMinecraft().fontRendererObj.getCharWidth('-')) * (52.22 / 6));
+//            System.out.println("Amount of separators: " + amount);
+//            System.out.println(Minecraft.getMinecraft().gameSettings.chatWidth + " * " + Minecraft.getMinecraft().fontRendererObj.getCharWidth('-') + " * (" + (52.22 / 6) + ")");
+        for (int i = 0; i < 50; i++) {
+            separator.add("-");
+        }
+        return "§9§m" + String.join("", separator);
     }
 
     public static void send(IChatComponent msg) {

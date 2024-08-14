@@ -23,6 +23,7 @@ public class CachedApiCall {
 
 
     public static List<CachedApiCall> cached = new ArrayList<>();
+    public static List<UUID> notExist = new ArrayList<>();
 
     public static boolean isCached(String username) {
         for (CachedApiCall call : cached) {
@@ -84,6 +85,7 @@ public class CachedApiCall {
         if (!playerReply.getPlayer().exists()) {
             api.error = new NoHypixelPlayerException(username);
             api.username = username;
+            notExist.add(uuid);
             cache(api);
             throw api.error;
         }

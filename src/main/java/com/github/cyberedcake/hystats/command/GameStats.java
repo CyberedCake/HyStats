@@ -5,6 +5,8 @@ import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class GameStats {
 
     private final @Nullable String prefix;
@@ -52,6 +54,7 @@ public class GameStats {
     public String getUser() { return this.userDisplayName; }
     public PlayerReply.Player player() { return this.player; }
     public StatusReply.Session session() { return this.session; }
+    public UUID getUUID() { return this.player.getUuid(); }
 
 
 

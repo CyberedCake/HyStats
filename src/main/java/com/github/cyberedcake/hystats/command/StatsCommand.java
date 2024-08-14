@@ -9,6 +9,7 @@ import com.github.cyberedcake.hystats.hypixel.CachedApiCall;
 import com.github.cyberedcake.hystats.utils.UChat;
 import com.github.cyberedcake.hystats.hypixel.ranks.HypixelRank;
 import com.github.cyberedcake.hystats.utils.Utils;
+import com.mojang.realmsclient.dto.PlayerInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("CallToPrintStackTrace")
 public class StatsCommand extends CommandBase {
@@ -91,23 +93,27 @@ public class StatsCommand extends CommandBase {
             }
 
             if (player.equalsIgnoreCase("*")) {
-                List<EntityPlayer> players = new ArrayList<>(Minecraft.getMinecraft().theWorld.playerEntities);
-                UChat.send("&7&oLoading stats of " + Math.min(24, players.size()) + " player(s)...", null, false);
+                List<UUID> players = Minecraft.getMinecraft()
+                        .getNetHandler()
+                        .getPlayerInfoMap()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .filter(npi -> !CachedApiCall.notExist.contains(npi.getGameProfile().getId()))
+                        .limit(24)
+                        .map(p -> p.getGameProfile().getId())
+                        .collect(Collectors.toList());
+                UChat.send("&7&oLoading stats of " + players.size() + " player(s)...", null, false);
 
                 StatsCategoryCommand finalCommand = command;
                 CompletableFuture.runAsync(() -> {
                     try {
                         List<CompletableFuture<IChatComponent>> futures = new ArrayList<>();
 
-                        for (int index = 0; index <= 24; index++) {
-                            if (index >= players.size()) break;
-
-                            EntityPlayer user = players.get(index);
-
-                            CompletableFuture<IChatComponent> future = this.getStats(user.getUniqueID().toString(), finalCommand, sender, !showAll, false, args)
+                        for (UUID uuid : players) {
+                            CompletableFuture<IChatComponent> future = this.getStats(uuid.toString(), finalCommand, sender, !showAll, false, args)
                                     .thenApply((stats) -> {
                                         if (stats == null) {
-                                            throw new IllegalStateException("Stats returned null!");
+                                            return null;
                                         }
 
                                         IChatComponent text = new ChatComponentText("");
@@ -121,11 +127,7 @@ public class StatsCommand extends CommandBase {
 
                                         return text;
                                     });
-                            if (future.isCompletedExceptionally()) {
-                                System.out.println("Error: " + index + " -> " + (index - 1));
-                                index--;
-                                continue;
-                            }
+                            if (future.isCompletedExceptionally()) continue;
 
                             futures.add(future);
                         }
@@ -133,11 +135,13 @@ public class StatsCommand extends CommandBase {
                         CompletableFuture<Void> all = CompletableFuture.allOf(futures.toArray(new CompletableFuture[]{}));
                         all.join();
 
+                        UChat.send(UChat.getSeparator(), null, false);
                         for (CompletableFuture<IChatComponent> futureComponent : futures) {
                             IChatComponent c = futureComponent.get();
                             if (c == null) continue;
                             UChat.send(c);
                         }
+                        UChat.send(UChat.getSeparator(), null, false);
 
                         if (players.size() > 24) {
                             UChat.send("&c&oThere are " + (players.size() - 24) + " player(s) that can't be shown!", null, false);
@@ -181,8 +185,8 @@ public class StatsCommand extends CommandBase {
 
                         } else {
                             UChat.send("&cFailed to send request to Hypixel API!", "&cException (fatal):\n&8" + exception, true);
-
                         }
+                        return null;
                     })
             ;
         } catch (Exception exception) {
@@ -222,7 +226,7 @@ public class StatsCommand extends CommandBase {
                 .exceptionally(e -> {
                     UChat.send("&cFailed to execute HyStats command!", "&cException:\n&8" + e, separator);
                     e.printStackTrace();
-                    throw new IllegalStateException(e.toString(), e);
+                    return null;
                 });
     }
 

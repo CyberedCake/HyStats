@@ -60,7 +60,9 @@ public enum BedWarsPrestige {
     SPINEL("&4#&c##&9#&1✥"),
     AUTUMN("&5#&c#&6#&e#&b✥"),
     MYSTIC("&a#&f##&a#✥"),
-    ETERNAL("&4#&5#&9##&1✥");
+    ETERNAL("&4#&5#&9##&1✥"),
+
+    CUSTOM(null);
 
     final int min;
     final int max;
@@ -75,7 +77,7 @@ public enum BedWarsPrestige {
     public static BedWarsPrestige valueOf(int star) {
         if (star >= 5100) return BedWarsPrestige.ETERNAL;
 
-        return Arrays.stream(BedWarsPrestige.values()).filter(p -> star > p.min && star < p.max).findFirst().orElse(BedWarsPrestige.NONE);
+        return Arrays.stream(BedWarsPrestige.values()).filter(p -> star >= p.min && star <= p.max).findFirst().orElse(BedWarsPrestige.NONE);
     }
 
     public static String format(int star) {

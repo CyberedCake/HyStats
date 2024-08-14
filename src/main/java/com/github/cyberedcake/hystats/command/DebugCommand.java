@@ -1,6 +1,8 @@
 package com.github.cyberedcake.hystats.command;
 
 import com.github.cyberedcake.hystats.HyStatsMain;
+import com.github.cyberedcake.hystats.categories.BedWars;
+import com.github.cyberedcake.hystats.hypixel.BedWarsPrestige;
 import com.github.cyberedcake.hystats.hypixel.ranks.SpecialHypixelRank;
 import com.github.cyberedcake.hystats.utils.UChat;
 import com.github.cyberedcake.hystats.utils.UUIDGrabber;
@@ -11,12 +13,14 @@ import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class DebugCommand extends CommandBase {
 
@@ -53,6 +57,25 @@ public class DebugCommand extends CommandBase {
 
                 HyStatsMain.loadApi();
                 send("&aReloaded the Hypixel API!");
+            } else if (args[0].equalsIgnoreCase("--parse-bw-level")) {
+                if (args.length < 2) {
+                    send("&cMust provide number!");
+                    return;
+                }
+
+                int level;
+                try {
+                    level = Integer.parseInt(args[1]);
+                } catch (NumberFormatException exception) {
+                    send("&cMust provide VALID integer!"); return;
+                }
+
+                BedWarsPrestige prestige = BedWarsPrestige.valueOf(level);
+                send("Level: &7" + BedWarsPrestige.format(level),
+                        "&6Prestige:\n&f" + Arrays.stream(prestige.name().toLowerCase().split("_"))
+                                .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
+                                .collect(Collectors.joining(" "))
+                );
             } else if (args[0].equalsIgnoreCase("--reload-special-ranks")) {
 
                 SpecialHypixelRank.createSpecialHypixelRanks();
@@ -98,6 +121,10 @@ public class DebugCommand extends CommandBase {
 
     private void send(String msg) {
         UChat.send("&6&lHyStats Debugger: &f" + msg, null, false);
+    }
+
+    private void send(String msg, @Nullable String hover) {
+        UChat.send("&6&lHyStats Debugger: &f" + msg, hover, false);
     }
 
     @Override

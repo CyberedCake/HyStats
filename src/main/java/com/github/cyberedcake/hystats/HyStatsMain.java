@@ -16,7 +16,9 @@ import java.util.UUID;
 @Mod(modid = "hystats", useMetadata=true)
 public class HyStatsMain {
 
-    public static final String API_KEY = "38d23ee7-1dac-4a97-971a-38f8c8628cc1";
+    // app key: 57e36a08-b03e-4848-9ce5-e64845a2ae2e
+    public static final String API_KEY = "57e36a08-b03e-4848-9ce5-e64845a2ae2e";
+
     public static HypixelAPI API;
 
     static { loadApi(); }
