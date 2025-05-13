@@ -2,51 +2,51 @@
   {
     "name": "hypixel",
     "uuid": "f7c77d99-9f15-4a66-a87d-c4a51ef30d19",
-    "rank": "&c[OWNER]"
+    "rank": "&c[OWNER] "
   },
   {
     "name": "Rezzus",
     "uuid": "9b2a30ec-f8b3-4dfe-bf49-9c5c367383f8",
-    "rank": "&c[OWNER]"
+    "rank": "&c[OWNER] "
   },
   {
     "name": "Technoblade",
     "uuid": "b876ec32-e396-476b-a115-8438d83c67d4",
-    "rank": "&d[PIG&b+++&d]"
+    "rank": "&d[PIG&b+++&d] "
   },
   {
     "name": "TommyInnit",
     "uuid": "e80e8194-323e-4142-9851-5e1bcb8a3508",
-    "rank": "&d[INNIT]"
+    "rank": "&d[INNIT] "
   },
   {
     "name": "Dinnerbone",
     "uuid": "61699b2e-d327-4a01-9f1e-0ea8c3f06bc6",
-    "rank": "&6[MOJANG]"
+    "rank": "&6[MOJANG] "
   },
   {
     "name": "Grumm",
     "uuid": "e6b5c088-0680-44df-9e1b-9bf11792291b",
-    "rank": "&6[MOJANG]"
+    "rank": "&6[MOJANG] "
   },
   {
     "name": "Marc",
     "uuid": "b0588118-6e75-410d-b2db-4d3066b223f7",
-    "rank": "&6[MOJANG]"
+    "rank": "&6[MOJANG] "
   },
   {
     "name": "Searge",
     "uuid": "696a82ce-41f4-4b51-aa31-b8709b8686f0",
-    "rank": "&6[MOJANG]"
+    "rank": "&6[MOJANG] "
   },
   {
     "name": "MasterControl",
     "uuid": "c1ec7a05-44d8-4dd8-a44a-6eb400570ed7",
-    "rank": "&c[MCP]"
+    "rank": "&c[MCP] "
   },
   {
     "name": "HypixelEvents",
     "uuid": "1a38c104-ddae-4726-af31-98e1c35b4986",
-    "rank": "&6[EVENTS]"
+    "rank": "&6[EVENTS] "
   }
 ]
