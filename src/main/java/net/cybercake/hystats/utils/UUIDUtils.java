@@ -2,30 +2,52 @@ package net.cybercake.hystats.utils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.hypixel.exceptions.UserNotExistException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetworkPlayerInfo;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class UUIDUtils {
 
     private static final Map<String, UUID> cachedUsernames = new HashMap<>();
 
     public static UUID getUUIDOf(String username) {
+        // method one: check cache
         UUID uuid = cachedUsernames.get(username);
         if (uuid != null) return uuid;
 
+        // method two: search players in lobby
+        uuid = Minecraft.getMinecraft()
+                .getNetHandler()
+                .getPlayerInfoMap()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(NetworkPlayerInfo::getGameProfile)
+                .filter(profile -> profile.getName().equalsIgnoreCase(username))
+                .map(GameProfile::getId)
+                .findFirst()
+                .orElse(null);
+        if (uuid != null) {
+            cachedUsernames.putIfAbsent(username, uuid);
+            return uuid;
+        }
+
+        // method three: finally, if all else fails, fetch from api.mojang.com
         String url = "https://api.mojang.com/users/profiles/minecraft/" + username;
         try {
-            InputStream input = new URL(url).openStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            URL realUrl = new URL(url);
+            InputStream input = realUrl.openStream();
+            InputStreamReader inputReader = new InputStreamReader(input);
+            BufferedReader reader = new BufferedReader(inputReader);
 
-            JsonObject obj = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonObject obj = new JsonParser().parse(reader).getAsJsonObject();
             String stringUuid = convertUUID(obj.get("id").getAsString());
             UUID returned = UUID.fromString(stringUuid);
 
@@ -33,7 +55,7 @@ public class UUIDUtils {
 
             return returned;
         } catch (Exception exception) {
-            return null;
+            throw new UserNotExistException(6, username, exception);
         }
     }
 
