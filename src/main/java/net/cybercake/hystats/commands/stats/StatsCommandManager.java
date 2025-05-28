@@ -1,0 +1,185 @@
+package net.cybercake.hystats.commands.stats;
+
+import com.mojang.authlib.GameProfile;
+import net.cybercake.hystats.HyStats;
+import net.cybercake.hystats.commands.stats.categories.*;
+import net.cybercake.hystats.hypixel.CachedPlayer;
+import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
+import net.cybercake.hystats.utils.UChat;
+import net.cybercake.hystats.utils.UUIDUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.IChatComponent;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import static net.cybercake.hystats.utils.UChat.*;
+
+public class StatsCommandManager extends CommandBase {
+
+    private static final List<StatsCategoryCommand> commands = new ArrayList<>();
+
+    public StatsCommandManager() {
+        commands.add(new BasicStats());
+        commands.add(new BedWars());
+        commands.add(new MurderMystery());
+        commands.add(new SkyWars());
+        commands.add(new Socials());
+    }
+
+    @Override
+    public String getCommandName() {
+        return "stats";
+    }
+
+    @Override
+    public String getCommandUsage(ICommandSender sender) {
+        return "/stats <player> [<game>]";
+    }
+
+    @Override
+    public List<String> getCommandAliases() {
+        return new ArrayList<>(Collections.singletonList("hystats"));
+    }
+
+    @Override
+    public boolean canCommandSenderUseCommand(ICommandSender sender) {
+        return true;
+    }
+
+    @Override
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+        try {
+            if (args.length < 1) {
+                send(format("&cInvalid usage! &7" + this.getCommandUsage(sender), null, true)); return;
+            }
+
+            boolean compact;
+            if (args[0].startsWith(":")) {
+                compact = true;
+                args[0] = args[0].substring(1);
+            } else {
+                compact = false;
+            }
+
+            String requestedPlayer = args[0].replace(".", sender.getName());
+
+            StatsCategoryCommand command = null;
+            if (args.length == 1) {
+                command = new BasicStats();
+            }
+            for (StatsCategoryCommand cmd : commands) {
+                if (command != null) {
+                    break;
+                }
+                if (args[1].equalsIgnoreCase(cmd.name)
+                        || (cmd.aliases.length > 0 && Arrays.stream(cmd.aliases).anyMatch(s -> s.equalsIgnoreCase(args[1])))
+                ) {
+                    command = cmd;
+                }
+            }
+
+            if (command == null) {
+                send(format("&cInvalid category: &8" + args[1] + "\n&cType &7/stats help &cfor help!", null, true));
+                return;
+            }
+
+            if (!HyStats.hypixel.isApiEnabled()) {
+                send(format("&cThe Hypixel API has been disabled and cannot continue.\n&7&oThis is likely due to a previous fatal error!", null, false));
+                return;
+            }
+
+            final StatsCategoryCommand finalCommand = command;
+            if (requestedPlayer.contains("*")) {
+                CompletableFuture.runAsync(() -> {
+                    this.findAllInLobby(sender, finalCommand);
+                });
+                return;
+            }
+
+            if ((requestedPlayer.length() > 16
+                    || !StringUtils.isAlphanumeric(requestedPlayer.replace("_", "")))
+                    && !UUIDUtils.isUUID(requestedPlayer)
+            ) {
+                send(format("&cThat player does not exist: &8" + requestedPlayer, null, true)); return;
+            }
+
+            CompletableFuture.runAsync(() -> {
+                UChat.send(
+                        this.processRequest(sender, requestedPlayer, finalCommand, compact, true)
+                );
+            });
+        } catch (Exception exception) {
+            exception.printStackTrace(System.err);
+            send(format("&cAn error occurred: &8" + exception, exception.toString(), true));
+        }
+    }
+
+    private IChatComponent processRequest(ICommandSender sender, String requestedPlayer, StatsCategoryCommand command, boolean compact, boolean showUtilityMessages) {
+        try {
+            command.messages.clear();
+
+            long mss = System.currentTimeMillis();
+            UUID user = UUIDUtils.processUUID(requestedPlayer);
+            CachedPlayer player = HyStats.hypixel.getPlayer(user, UUIDUtils.isUUID(requestedPlayer) ? null : requestedPlayer);
+
+            System.out.println("[" + (System.currentTimeMillis() - mss) + "ms] Loading stats for " + user + "...");
+            if (player.isExpired()) {
+                if (showUtilityMessages) {
+                    UChat.send(format("&7&oLoading stats, please wait...", null, false));
+                }
+                player.grab();
+            }
+
+            GameStats stats = player.asGameStats(command.prefix);
+            System.out.println("[" + (System.currentTimeMillis() - mss) + "ms] Printing stats for " + user + " (user: " + stats.getUser() + ") in category " + command.name);
+            command.execute(sender, stats, compact);
+
+            IChatComponent sent = showUtilityMessages ? separator() : UChat.format("");
+            int index = 0;
+            for (IChatComponent chat : command.messages) {
+                sent = sent.appendSibling(UChat.format(compact ? (index > 0 ? " &8| " : "") : "\n"))
+                        .appendSibling(chat);
+                index++;
+            }
+            sent = sent.appendSibling(showUtilityMessages ? separator() : UChat.format(""));
+
+            return sent;
+        } catch (Exception error) {
+            error.printStackTrace(System.err);
+
+            if (HyStatsError.class.isAssignableFrom(error.getClass())) {
+                return format("&c" + error.getMessage().split("\\|E:")[0], error.toString().replaceAll("\\|E:", "\n&fError Code: &d"), showUtilityMessages);
+            }
+            return format("&cAn error occurred with processing your request: &8" + error.toString().replace("\\|E:", ""), error.toString().replace("\\E:", "\n&fError Code: &d"), showUtilityMessages);
+        }
+    }
+
+    private void findAllInLobby(ICommandSender sender, StatsCategoryCommand command) {
+        List<GameProfile> players = Minecraft.getMinecraft()
+                .getNetHandler()
+                .getPlayerInfoMap()
+                .stream()
+                .filter(Objects::nonNull)
+                .limit(24)
+                .map(NetworkPlayerInfo::getGameProfile)
+                .collect(Collectors.toList());
+        UChat.send(format(
+                "&7&oLoading stats of " + players.size() + " player" + (players.size() == 1 ? "" : "s") + ", please wait..."
+        ));
+
+        List<IChatComponent> components = new ArrayList<>();
+        for (GameProfile player : players) {
+            components.add(this.processRequest(sender, player.getName(), command, true, false));
+        }
+
+        components.forEach(UChat::send);
+    }
+}

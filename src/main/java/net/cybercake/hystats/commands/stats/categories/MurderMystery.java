@@ -1,0 +1,88 @@
+package net.cybercake.hystats.commands.stats.categories;
+
+import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
+import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.utils.Time;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.event.HoverEvent;
+import net.minecraft.util.IChatComponent;
+
+import javax.annotation.Nullable;
+
+import static net.cybercake.hystats.utils.ApiUtils.formatDouble;
+import static net.cybercake.hystats.utils.UChat.format;
+
+public class MurderMystery extends StatsCategoryCommand {
+
+    public MurderMystery() {
+        super("murdermystery", "stats.MurderMystery", "View a Hypixel user's Murder Mystery statistics.", "mm", "murder");
+    }
+
+    @Override
+    public void execute(ICommandSender sender, GameStats stats, boolean compact) {
+        double chanceDetective = stats.getDoubleProperty("detective_chance");
+        double chanceMurderer = stats.getDoubleProperty("murderer_chance");
+        double chanceAny = 100 - chanceMurderer - chanceDetective;
+
+        double wins = stats.getDoubleProperty("wins", 0D);
+        double winsDetective = stats.getDoubleProperty("detective_wins", 0D);
+        double winsMurderer = stats.getDoubleProperty("murderer_wins", 0D);
+
+        double kills = stats.getDoubleProperty("kills", 0D);
+        double killsDetective = stats.getDoubleProperty("bow_kills", 0D);
+        double killsMurderer = stats.getDoubleProperty("knife_kills", 0D);
+
+        int quickestDetectiveWin = stats.getIntProperty("quickest_detective_win_time_seconds", -1);
+        int quickestMurdererWin = stats.getIntProperty("quickest_murderer_win_time_seconds", -1);
+
+        if (compact) {
+            text(stats.getUser());
+            text("&fWins: &a" + formatDouble(wins),
+                    "&6&l&nWins:\n&eTotal: &f" + formatDouble(wins) + "\n&cAs Murderer: &f" +formatDouble(winsMurderer) + "\n&bAs Detective: &f" + formatDouble(winsDetective)
+            );
+            text("&fKills: &c" + formatDouble(kills),
+                    "&6&l&nKills:\n&eTotal: &f" + formatDouble(kills) + "\n&cAs Murderer: &f" + formatDouble(killsMurderer) + "\n&bAs Detective: &f" + formatDouble(killsDetective)
+            );
+            text("&f&nTimes",
+                    "&6&l&nFastest Wins:\n&cAs Murderer: &f" + Time.formatBasicSeconds(quickestMurdererWin) + "\n&bAs Detective: &f" + Time.formatBasicSeconds(quickestDetectiveWin)
+            );
+            text("&f&nChances",
+                    "&6&l&nChances:\n&aAs Innocent: &f" + formatDouble(chanceAny) + "%\n&cAs Murderer: &f" + formatDouble(chanceMurderer) + "%\n&bAs Detective: &f" + formatDouble(chanceDetective) + "%"
+            );
+            return;
+        }
+
+        text("Murder Mystery Stats of " + stats.getUser());
+        text(" ");
+        text(showAll("Chances", "&aAs Innocent::&a" + formatDouble(chanceAny) + "%", formatDouble(chanceMurderer) + "%", formatDouble(chanceDetective) + "%"));
+        text(showAll("Wins", formatDouble(wins), formatDouble(winsMurderer), formatDouble(winsDetective)));
+        text(showAll("Kills", formatDouble(kills), formatDouble(killsMurderer), formatDouble(killsDetective)));
+        text(showAll("Fastest Win", null, Time.formatBasicSeconds(quickestMurdererWin), Time.formatBasicSeconds(quickestDetectiveWin)));
+        text("&fTokens: &2" + formatDouble(stats.getIntProperty("coins", 0)));
+    }
+
+    private IChatComponent showAll(String title, @Nullable String total, String murderer, String detective) {
+        IChatComponent component = format("&f" + title + ": ");
+
+        if (total != null) {
+            component = component
+                    .appendSibling(makeHover("&e" + (!total.contains("::") ? total : total.split("::")[1]), !total.contains("::") ? "&eTotal" : total.split("::")[0]))
+                    .appendSibling(format(" &7/ "))
+            ;
+        }
+
+        component = component
+                .appendSibling(makeHover("&c" + murderer, "&cAs Murderer"))
+                .appendSibling(format(" &7/ "))
+                .appendSibling(makeHover("&b" + detective, "&bAs Detective"));
+
+        return component;
+    }
+
+    private IChatComponent makeHover(String text, String hover) {
+        IChatComponent returned = format(text);
+        returned.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, format(hover)));
+        return returned;
+    }
+
+}

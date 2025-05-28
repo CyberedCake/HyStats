@@ -1,6 +1,6 @@
 {
-  "package": "com.github.cyberedcake.hystats.mixin",
-  "plugin": "com.github.cyberedcake.hystats.init.AutoDiscoveryMixinPlugin",
+  "package": "net.cybercake.hystats.mixin",
+  "plugin": "net.cybercake.hystats.init.AutoDiscoveryMixinPlugin",
   "refmap": "mixins.${modid}.refmap.json",
   "minVersion": "0.7",
   "compatibilityLevel": "JAVA_8"
