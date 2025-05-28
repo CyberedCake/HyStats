@@ -48,7 +48,7 @@ public class BasicStats extends StatsCategoryCommand {
 
         if (compact) {
 
-            text(stats.getUser());
+            text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID());
             text("HL: &6" + networkLevel);
             text("AP: &e" + achievementPoints);
             text("Age: &2" + Time.getDuration(System.currentTimeMillis() / 1_000, stats.player().getFirstLoginDate().toEpochSecond(), false), firstLoginHover);

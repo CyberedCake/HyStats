@@ -24,6 +24,7 @@ public class SpecialHypixelRank {
         return ranks.stream().filter(s -> s.uuid.equals(uuid)).findFirst().orElse(null);
     }
 
+    @SuppressWarnings({"deprecation"})
     public static void createSpecialHypixelRanks() throws RuntimeException {
         if (!ranks.isEmpty()) ranks.clear();
         try {
@@ -32,11 +33,11 @@ public class SpecialHypixelRank {
 
             InputStreamReader inputStreamReader = new InputStreamReader(url.openStream());
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            JsonElement generalElement = JsonParser.parseReader(bufferedReader);
+            JsonElement generalElement = new JsonParser().parse(bufferedReader);
             System.out.println("Found special rank JSON data: " + generalElement.toString());
             JsonArray array = generalElement.getAsJsonArray();
 
-            for (JsonElement element : array.asList()) {
+            for (JsonElement element : array) {
                 JsonObject obj = element.getAsJsonObject();
 
                 UUID uuid = UUID.fromString(obj.get("uuid").getAsString());

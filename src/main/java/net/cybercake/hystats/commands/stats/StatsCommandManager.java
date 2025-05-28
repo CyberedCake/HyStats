@@ -1,8 +1,10 @@
 package net.cybercake.hystats.commands.stats;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.commands.stats.categories.*;
+import net.cybercake.hystats.events.CheckPartyList;
 import net.cybercake.hystats.hypixel.CachedPlayer;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
@@ -16,6 +18,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -104,6 +107,12 @@ public class StatsCommandManager extends CommandBase {
                 return;
             }
 
+            if (ImmutableList.of("-p", "-party", "--p", "--party").contains(requestedPlayer)) {
+                send(format("&7&oChecking your party...", null, false));
+                new CheckPartyList(sender, finalCommand);
+                return;
+            }
+
             if ((requestedPlayer.length() > 16
                     || !StringUtils.isAlphanumeric(requestedPlayer.replace("_", "")))
                     && !UUIDUtils.isUUID(requestedPlayer)
@@ -117,8 +126,7 @@ public class StatsCommandManager extends CommandBase {
                 );
             });
         } catch (Exception exception) {
-            exception.printStackTrace(System.err);
-            send(format("&cAn error occurred: &8" + exception, exception.toString(), true));
+            send(this.getError(exception, true));
         }
     }
 
@@ -153,12 +161,7 @@ public class StatsCommandManager extends CommandBase {
 
             return sent;
         } catch (Exception error) {
-            error.printStackTrace(System.err);
-
-            if (HyStatsError.class.isAssignableFrom(error.getClass())) {
-                return format("&c" + error.getMessage().split("\\|E:")[0], error.toString().replaceAll("\\|E:", "\n&fError Code: &d"), showUtilityMessages);
-            }
-            return format("&cAn error occurred with processing your request: &8" + error.toString().replace("\\|E:", ""), error.toString().replace("\\E:", "\n&fError Code: &d"), showUtilityMessages);
+            return this.getError(error, showUtilityMessages);
         }
     }
 
@@ -180,6 +183,46 @@ public class StatsCommandManager extends CommandBase {
             components.add(this.processRequest(sender, player.getName(), command, true, false));
         }
 
+        send(UChat.separator());
         components.forEach(UChat::send);
+        send(UChat.separator());
+    }
+
+    public void findAllInParty(ICommandSender sender, StatsCategoryCommand command, List<String> users, @Nullable Exception exception) {
+        if (exception != null) {
+            send(this.getError(exception, true));
+            return;
+        }
+
+        if (users.isEmpty()) {
+            send(format("&cYou are not currently in a party."));
+            return;
+        }
+
+        send(format("&7&oLoading stats of " + users.size() + " player" + (users.size() == 1 ? "" : "s") + ", please wait...", null, false));
+
+        List<IChatComponent> components = new ArrayList<>();
+        for (String user : users) {
+            components.add(this.processRequest(sender, user, command, true, false));
+        }
+
+        send(UChat.separator());
+        components.forEach(UChat::send);
+        send(UChat.separator());
+    }
+
+
+    private IChatComponent getError(Exception error, boolean showUtilityMessages) {
+        error.printStackTrace(System.err);
+
+        String hover = "&8" + error.toString();
+        hover = hover.replaceAll("\\|E:", "\n&fError Code: &d");
+        hover = hover + (error.getCause() != null ? "\n&fCause: &8" + error.getCause() : "");
+        hover = hover + "\n\n&7&oCheck your logs for more information!";
+
+        if (HyStatsError.class.isAssignableFrom(error.getClass())) {
+            return format("&c" + error.getMessage().split("\\|E:")[0], hover, showUtilityMessages);
+        }
+        return format("&cAn error occurred while processing your request: &8" + error.toString().replace("\\|E:", ""), hover, showUtilityMessages);
     }
 }

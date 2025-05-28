@@ -3,6 +3,7 @@ package net.cybercake.hystats.commands.stats;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.utils.UChat;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.event.ClickEvent;
 import net.minecraft.util.IChatComponent;
 
 import javax.annotation.Nullable;
@@ -29,6 +30,14 @@ public abstract class StatsCategoryCommand {
 
     public void text(IChatComponent message) {
         this.messages.add(message);
+    }
+
+    public void text(String message, @Nullable String hover, @Nullable String clickCommand) {
+        IChatComponent component = UChat.format(message, hover, false);
+        if (clickCommand != null) {
+            component.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, clickCommand));
+        }
+        this.text(component);
     }
 
     public void text(String message, @Nullable String hover) {

@@ -36,7 +36,7 @@ public class MurderMystery extends StatsCategoryCommand {
         int quickestMurdererWin = stats.getIntProperty("quickest_murderer_win_time_seconds", -1);
 
         if (compact) {
-            text(stats.getUser());
+            text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
             text("&fWins: &a" + formatDouble(wins),
                     "&6&l&nWins:\n&eTotal: &f" + formatDouble(wins) + "\n&cAs Murderer: &f" +formatDouble(winsMurderer) + "\n&bAs Detective: &f" + formatDouble(winsDetective)
             );

@@ -77,6 +77,10 @@ public class DebugCommand extends CommandBase {
                 }
 
                 send((String.join(" ", Arrays.copyOfRange(args, 1, args.length))));
+            } else if (args[0].equalsIgnoreCase("--server")) {
+
+                send(HyStats.getConnectedServer().toString());
+
             } else if (args[0].equalsIgnoreCase("--uuid-of")) {
 
                 if (args.length < 2) {

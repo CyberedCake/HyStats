@@ -25,7 +25,7 @@ public class SkyWars extends StatsCategoryCommand {
         int winstreak = stats.getIntProperty("win_streak", -1);
 
         if (compact) {
-            text(stats.getUser());
+            text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
             text("Level: &7" + level);
             text("WLR: &e" + formatDouble(wins / losses, "#,###.00"), "&fWins/Losses:\n&2" + formatDouble(wins) + "&7/&4" + formatDouble(losses));
             text("KDR: &6" + formatDouble(kills / deaths, "#,###.00"), "&fKills/Deaths:\n&a" + formatDouble(kills) + "&7/&c" + formatDouble(deaths));

@@ -48,6 +48,7 @@ public class GameStats {
     public String getUser() { return this.player.displayName; }
     public PlayerReply.Player player() { return this.player.notNull(this.player.playerReply).getPlayer(); }
     public StatusReply.Session session() { return this.player.notNull(this.player.statusReply).getSession(); }
+    public String getUsername() { return this.player.username; }
     public UUID getUUID() { return this.player.getUniqueId(); }
 
 

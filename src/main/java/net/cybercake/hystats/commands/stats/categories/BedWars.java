@@ -39,7 +39,7 @@ public class BedWars extends StatsCategoryCommand {
         int winstreak = stats.getIntProperty("winstreak", -1);
 
         if (compact) {
-            text(stats.getUser());
+            text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
             text("Star: &7" + starFormatted,
                     "&6Prestige:\n&f" + prestigeFormatted
             );
