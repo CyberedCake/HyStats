@@ -15,7 +15,7 @@ public enum HypixelRank {
 
     VIP("&a[VIP]", (player, prefix) -> prefix + " "),
 
-    VIP_PLUS("&a[VIP&6]&a]", (player, prefix) -> prefix + " "),
+    VIP_PLUS("&a[VIP&6+&a]", (player, prefix) -> prefix + " "),
 
     MVP("&b[MVP]", (player, prefix) -> prefix + " "),
 
@@ -30,7 +30,7 @@ public enum HypixelRank {
                     .replace("{rank_color}", player.hasProperty("monthlyRankColor") ? player.getStringProperty("monthlyRankColor", "GOLD").equalsIgnoreCase("AQUA") ? "&b" : "&6" : "&6")
                     + " "),
 
-    YOUTUBE("&c&f[YOUTUBE&c]", (player, prefix) -> prefix + " "),
+    YOUTUBER("&c[&fYOUTUBE&c]", (player, prefix) -> prefix + " "),
 
     STAFF("&c[&6ዞ&c]", (player, prefix) -> prefix + " "),
 
