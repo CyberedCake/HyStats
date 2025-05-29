@@ -73,7 +73,7 @@ public class BasicStats extends StatsCategoryCommand {
                 IChatComponent component = format("Social Media: &7" + map.size() + " linked account" + (map.size() == 1 ? "" : "s") + " ... click to view!");
                 component.getChatStyle()
                         .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, format("&eClick to view " + stats.getUser() + "&e'" + (stats.player().getName().endsWith("s") ? "" : "s") + " social media!")))
-                        .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hystats " + stats.player().getName() + " socials"));
+                        .setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hystats " + stats.getUUID() + " socials"));
                 text(component);
             }
 
