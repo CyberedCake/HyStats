@@ -98,7 +98,7 @@ public class CheckPartyList {
 
                 String[] tokens = message.split(" ");
                 for (String token : tokens) {
-                    if (!StringUtils.isAlphanumeric(token)) continue;
+                    if (!StringUtils.isAlphanumeric(token.replace("_", ""))) continue;
 
                     CheckPartyList.this.potentialUsernames.add(token);
                 }
