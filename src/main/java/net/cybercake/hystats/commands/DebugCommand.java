@@ -2,9 +2,8 @@ package net.cybercake.hystats.commands;
 
 import com.google.common.collect.ImmutableList;
 import net.cybercake.hystats.HyStats;
-import net.cybercake.hystats.hypixel.exceptions.UserNotExistException;
+import net.cybercake.hystats.exceptions.UserNotExistException;
 import net.cybercake.hystats.hypixel.leveling.BedWarsPrestige;
-import net.cybercake.hystats.hypixel.ranks.HypixelRank;
 import net.cybercake.hystats.hypixel.ranks.SpecialHypixelRank;
 import net.cybercake.hystats.utils.UChat;
 import net.cybercake.hystats.utils.UTabCompletions;
@@ -51,6 +50,12 @@ public class DebugCommand extends CommandBase {
             if (args[0].equalsIgnoreCase("reloadapi")) {
                 HyStats.hypixel.reloadApi();
                 send("&aReloaded the Hypixel API and invalidated all caches!");
+            } else if (args[0].equalsIgnoreCase("forcekey")) {
+                if (args.length < 2) {
+                    send("&cMust provide key!"); return;
+                }
+                HyStats.hypixel.setKey(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+                send("&aSet API key to &e" + );
             } else if (args[0].equalsIgnoreCase("bwlevel")) {
                 if (args.length < 3) {
                     int page;

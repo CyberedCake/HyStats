@@ -37,18 +37,21 @@ public class GameStats {
         CommandArgument arg = this.args.arg("displayname", "dn");
         this.displayName = this.player.displayName;
         if (arg.exists()) {
-            NetworkPlayerInfo networkPlayerInfo = HyStats.getOnlinePlayers()
+            HyStats.getOnlinePlayers()
                     .stream()
                     .filter(npi -> npi.getGameProfile().getId().equals(this.getUUID()))
                     .findFirst()
-                    .orElse(null);
-            if (networkPlayerInfo != null) {
-                IChatComponent profile = networkPlayerInfo.getDisplayName() != null
-                        ? networkPlayerInfo.getDisplayName()
-                        : UChat.format(networkPlayerInfo.getPlayerTeam().formatString(this.player.username));
-
-                this.displayName = profile.getFormattedText();
-            }
+                    .ifPresent(networkPlayerInfo ->
+                            this.displayName =
+                                    (networkPlayerInfo.getDisplayName() != null
+                                        ? networkPlayerInfo.getDisplayName().getFormattedText()
+                                        : (
+                                            networkPlayerInfo.getPlayerTeam() != null
+                                                ? networkPlayerInfo.getPlayerTeam().formatString(this.player.username)
+                                                : networkPlayerInfo.getGameProfile().getName()
+                                        )
+                                    )
+                    );
         }
     }
 
@@ -88,10 +91,15 @@ public class GameStats {
         IChatComponent username = format(this.getUser());
         IChatComponent guildTag = format("");
         if (this.guild() != null) {
-            guildTag = format("&" + ColorCode.getColor(this.guild().getTagColor()).getCode() + " [" + this.guild().getTag() + "]");
-            guildTag.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hystats " + this.getUUID() + " guild"));
-            guildTag.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    format("&eClick here to view " + this.getUser() + "&e'" + (this.getUser().endsWith("s") ? "" : "s") + " guild, &b" + this.guild().getName() + "&e!")));
+            try {
+                guildTag = format("&" + ColorCode.getColor(this.guild().getTagColor()).getCode() + " [" + this.guild().getTag() + "]");
+                guildTag.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hystats " + this.getUUID() + " guild"));
+                guildTag.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        format("&eClick here to view " + this.getUser() + "&e'" + (this.getUser().endsWith("s") ? "" : "s") + " guild, &b" + this.guild().getName() + "&e!")));
+            } catch (Exception exception) {
+                // anything goes wrong, default back to original
+                guildTag = format("");
+            }
         }
         return username.appendSibling(guildTag);
     }

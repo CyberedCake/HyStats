@@ -1,17 +1,12 @@
 package net.cybercake.hystats;
 
-import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.commands.DebugCommand;
 import net.cybercake.hystats.commands.stats.StatsCommandManager;
-import net.cybercake.hystats.hypixel.ApiManager;
+import net.cybercake.hystats.api.ApiManager;
 import net.cybercake.hystats.hypixel.ranks.SpecialHypixelRank;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.init.Blocks;
 import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
@@ -57,7 +52,8 @@ public class HyStats {
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(npi ->
-                        !npi.getPlayerTeam().formatString("").toUpperCase().contains("NPC"))
+                        npi.getPlayerTeam() == null
+                        || (npi.getPlayerTeam() != null && !npi.getPlayerTeam().formatString("").toUpperCase().contains("NPC")))
                 .collect(Collectors.toList());
     }
 

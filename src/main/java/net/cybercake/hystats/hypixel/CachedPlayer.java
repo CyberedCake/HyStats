@@ -1,10 +1,11 @@
 package net.cybercake.hystats.hypixel;
 
+import net.cybercake.hystats.api.ApiManager;
 import net.cybercake.hystats.commands.flags.Arguments;
-import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
-import net.cybercake.hystats.hypixel.exceptions.UserNotPlayHypixelException;
-import net.cybercake.hystats.hypixel.exceptions.UnusualApiResponse;
-import net.cybercake.hystats.hypixel.exceptions.UserNotExistException;
+import net.cybercake.hystats.exceptions.HyStatsError;
+import net.cybercake.hystats.exceptions.UserNotPlayHypixelException;
+import net.cybercake.hystats.exceptions.UnusualApiResponse;
+import net.cybercake.hystats.exceptions.UserNotExistException;
 import net.cybercake.hystats.hypixel.ranks.HypixelRank;
 import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
@@ -29,11 +30,11 @@ public class CachedPlayer {
     @Nullable String username;
     @Nullable String displayName;
 
-    CachedPlayer(ApiManager api, UUID uuid) {
+    public CachedPlayer(ApiManager api, UUID uuid) {
         this(api, uuid, null);
     }
 
-    CachedPlayer(ApiManager api, UUID uuid, String username) {
+    public CachedPlayer(ApiManager api, UUID uuid, @Nullable String username) {
         if (uuid == null) {
             throw new UserNotExistException(0, "[no user input]");
         }

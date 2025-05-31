@@ -1,16 +1,16 @@
 package net.cybercake.hystats.commands.stats;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.stats.categories.*;
 import net.cybercake.hystats.events.CheckPartyList;
-import net.cybercake.hystats.hypixel.CachedPlayer;
-import net.cybercake.hystats.hypixel.GameStats;
-import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
+import net.cybercake.hystats.exceptions.HyStatsError;
 import net.cybercake.hystats.utils.UChat;
 import net.cybercake.hystats.utils.UTabCompletions;
 import net.cybercake.hystats.utils.UUIDUtils;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -59,6 +59,11 @@ public class StatsCommandManager extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         try {
+            if (!HyStats.hypixel.isApiEnabled()) {
+                send(format("&cThe Hypixel API has been disabled and cannot continue.\n&7&oCheck your logs for more information! Try rebooting your game.", null, true));
+                return;
+            }
+
             if (args.length < 1) {
                 send(format("&cInvalid usage! &7" + this.getCommandUsage(sender), null, true)); return;
             }
@@ -96,11 +101,6 @@ public class StatsCommandManager extends CommandBase {
                 return;
             }
 
-            if (!HyStats.hypixel.isApiEnabled()) {
-                send(format("&cThe Hypixel API has been disabled and cannot continue.\n&7&oThis is likely due to a previous fatal error!", null, false));
-                return;
-            }
-
             RequestProcessor processor = RequestProcessor.create()
                     .manager(this)
                     .command(command)
@@ -109,9 +109,14 @@ public class StatsCommandManager extends CommandBase {
                     .compact(compact)
                     .showUtilityMessages(true)
                     .build();
-            if (requestedPlayer.contains("*")) {
+
+            if (ImmutableList.of("-a", "-all", "--a", "--all", "*").contains(requestedPlayer)) {
+                List<GameProfile> players = HyStats.getOnlinePlayers().stream().map(NetworkPlayerInfo::getGameProfile).limit(24).collect(Collectors.toList());
+                UChat.send(format(
+                        "&7&oLoading stats of " + players.size() + " player" + (players.size() == 1 ? "" : "s") + ", please wait..."
+                ));
                 CompletableFuture.runAsync(() -> {
-                    processor.mass().findAllInLobby();
+                    processor.mass().showPlayers(players);
                 });
                 return;
             }

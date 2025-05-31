@@ -1,4 +1,4 @@
-package net.cybercake.hystats.hypixel.exceptions;
+package net.cybercake.hystats.exceptions;
 
 import java.util.UUID;
 

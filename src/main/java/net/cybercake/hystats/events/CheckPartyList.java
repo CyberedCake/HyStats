@@ -1,13 +1,10 @@
 package net.cybercake.hystats.events;
 
 import net.cybercake.hystats.HyStats;
-import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.stats.RequestProcessor;
-import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
-import net.cybercake.hystats.commands.stats.StatsCommandManager;
-import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
+import net.cybercake.hystats.exceptions.HyStatsError;
+import net.cybercake.hystats.utils.UChat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.command.ICommandSender;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -53,7 +50,7 @@ public class CheckPartyList {
         public void chatSent(ClientChatReceivedEvent event) {
             try {
                 String message = event.message.getUnformattedText();
-                if (message.contains(new String(new char[53]).replace("\0", "-"))) {
+                if (message.contains(UChat.repeat("-", 53))) {
                     event.setCanceled(true);
                     status = status == Status.WAITING ? Status.WAITING_FOR_MEMBERS : Status.EXITED;
                 }
@@ -69,11 +66,11 @@ public class CheckPartyList {
                 if (lines >= 10 || status == Status.EXITED) {
                     CheckPartyList.this.done();
                     if (CheckPartyList.this.potentialUsernames.isEmpty()) {
-                        processor.mass().findAllInParty(new ArrayList<>(), new HyStatsError(8, "No players found in your party."));
+                        processor.mass().showAsParty(new ArrayList<>(), new HyStatsError(8, "No players found in your party."));
                         return;
                     }
                     CompletableFuture.runAsync(() -> {
-                        processor.mass().findAllInParty(potentialUsernames, null);
+                        processor.mass().showAsParty(potentialUsernames, null);
                     });
                     return;
                 }
@@ -102,7 +99,7 @@ public class CheckPartyList {
                 }
             } catch (Exception exception) {
                 CheckPartyList.this.done();
-                processor.mass().findAllInParty(new ArrayList<>(), exception);
+                processor.mass().showAsParty(new ArrayList<>(), exception);
             }
         }
 

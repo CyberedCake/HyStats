@@ -1,4 +1,4 @@
-package net.cybercake.hystats.hypixel.exceptions;
+package net.cybercake.hystats.exceptions;
 
 // 10 next number
 public class HyStatsError extends RuntimeException {

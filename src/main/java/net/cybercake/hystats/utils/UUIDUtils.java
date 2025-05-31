@@ -3,7 +3,7 @@ package net.cybercake.hystats.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
-import net.cybercake.hystats.hypixel.exceptions.UserNotExistException;
+import net.cybercake.hystats.exceptions.UserNotExistException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
 
@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class UUIDUtils {
 

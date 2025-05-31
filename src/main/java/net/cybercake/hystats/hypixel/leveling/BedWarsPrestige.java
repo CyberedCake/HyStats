@@ -82,13 +82,14 @@ public enum BedWarsPrestige {
     public static String findAndFormat(int star) {
         // find
         BedWarsPrestige prestige = valueOf(star);
-        if (prestige == BedWarsPrestige.NONE) return prestige.display.replace("#", String.valueOf(star));
 
         // format
         return prestige.format(star);
     }
 
     public String format(int star) {
+        if (this == BedWarsPrestige.NONE) return this.display.replace("#", String.valueOf(star));
+
         String formatted = this.display;
         for (char digit : String.valueOf(star).toCharArray()) {
             formatted = formatted.replaceFirst("#", String.valueOf(digit));

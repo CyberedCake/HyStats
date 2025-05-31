@@ -12,7 +12,11 @@ import java.util.regex.Pattern;
 public class UChat {
 
     private static final String PATTERN = "&([a-f0-9klon])";
-    private static final String SEPARATOR = "§9§m" + new String(new char[53]).replace("\0", "-");
+    private static final String SEPARATOR = "§9§m" + repeat("-", 53);
+
+    public static String repeat(String string, int times) {
+        return new String(new char[times]).replace("\0", string);
+    }
 
     public static IChatComponent format(String message) {
         try {

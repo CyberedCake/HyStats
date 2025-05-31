@@ -1,4 +1,4 @@
-package net.cybercake.hystats.hypixel.exceptions;
+package net.cybercake.hystats.exceptions;
 
 public class UnusualApiResponse extends HyStatsError {
 
