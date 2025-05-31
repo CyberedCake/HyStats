@@ -48,11 +48,6 @@ public class GameStats {
                         : UChat.format(networkPlayerInfo.getPlayerTeam().formatString(this.player.username));
 
                 this.displayName = profile.getFormattedText();
-                if (
-                        this.player.displayName != null && this.player.username != null &&
-                                !profile.getUnformattedText().equalsIgnoreCase(ColorCode.stripColor(this.player.displayName))) {
-                    this.displayName = this.player.displayName.replace(this.player.username, "") + profile.getFormattedText();
-                }
             }
         }
     }
