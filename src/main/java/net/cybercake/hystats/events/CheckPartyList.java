@@ -2,6 +2,7 @@ package net.cybercake.hystats.events;
 
 import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.commands.flags.Arguments;
+import net.cybercake.hystats.commands.stats.RequestProcessor;
 import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
 import net.cybercake.hystats.commands.stats.StatsCommandManager;
 import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
@@ -17,24 +18,20 @@ import java.util.concurrent.CompletableFuture;
 
 public class CheckPartyList {
 
-    private final ICommandSender sender;
-    private final StatsCategoryCommand statsType;
-    private final Arguments args;
+    private final RequestProcessor processor;
 
     private Status status;
-    private List<String> potentialUsernames;
+    private final List<String> potentialUsernames;
     private int lines;
 
-    private ListenForChat listener;
+    private final ListenForChat listener;
 
-    public CheckPartyList(ICommandSender sender, StatsCategoryCommand statsType, Arguments args) {
-        if (!HyStats.getConnectedServer().toString().contains("hypixel.net")) {
+    public CheckPartyList(RequestProcessor processor) {
+        if (!HyStats.isHypixel()) {
             throw new HyStatsError(7, "You must be on Hypixel to use this command!");
         }
 
-        this.sender = sender;
-        this.statsType = statsType;
-        this.args = args;
+        this.processor = processor;
 
         this.status = Status.WAITING;
         this.potentialUsernames = new ArrayList<>();
@@ -72,13 +69,11 @@ public class CheckPartyList {
                 if (lines >= 10 || status == Status.EXITED) {
                     CheckPartyList.this.done();
                     if (CheckPartyList.this.potentialUsernames.isEmpty()) {
-                        HyStats.command.findAllInParty(sender, statsType, args, potentialUsernames,
-                                new HyStatsError(8, "No players found in your party.")
-                                );
+                        processor.mass().findAllInParty(new ArrayList<>(), new HyStatsError(8, "No players found in your party."));
                         return;
                     }
                     CompletableFuture.runAsync(() -> {
-                        HyStats.command.findAllInParty(sender, statsType, args, potentialUsernames, null);
+                        processor.mass().findAllInParty(potentialUsernames, null);
                     });
                     return;
                 }
@@ -107,7 +102,7 @@ public class CheckPartyList {
                 }
             } catch (Exception exception) {
                 CheckPartyList.this.done();
-                HyStats.command.findAllInParty(sender, statsType, args, new ArrayList<>(), exception);
+                processor.mass().findAllInParty(new ArrayList<>(), exception);
             }
         }
 

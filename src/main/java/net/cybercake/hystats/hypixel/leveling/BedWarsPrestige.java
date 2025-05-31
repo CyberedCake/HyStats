@@ -1,6 +1,7 @@
 package net.cybercake.hystats.hypixel.leveling;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public enum BedWarsPrestige {
 
@@ -78,15 +79,27 @@ public enum BedWarsPrestige {
         return Arrays.stream(BedWarsPrestige.values()).filter(p -> star >= p.min && star <= p.max).findFirst().orElse(BedWarsPrestige.NONE);
     }
 
-    public static String format(int star) {
+    public static String findAndFormat(int star) {
+        // find
         BedWarsPrestige prestige = valueOf(star);
         if (prestige == BedWarsPrestige.NONE) return prestige.display.replace("#", String.valueOf(star));
 
-        String formatted = prestige.display;
+        // format
+        return prestige.format(star);
+    }
+
+    public String format(int star) {
+        String formatted = this.display;
         for (char digit : String.valueOf(star).toCharArray()) {
             formatted = formatted.replaceFirst("#", String.valueOf(digit));
         }
         return formatted;
+    }
+
+    public String nameFormatted() {
+        return Arrays.stream(this.name().toLowerCase().split("_"))
+                .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
+                .collect(Collectors.joining(" "));
     }
 
 }

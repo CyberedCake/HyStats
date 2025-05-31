@@ -22,10 +22,8 @@ public class BedWars extends StatsCategoryCommand {
     public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
         int star = stats.player().getIntProperty("achievements.bedwars_level", 0);
         BedWarsPrestige prestige = BedWarsPrestige.valueOf(star);
-        String starFormatted = BedWarsPrestige.format(star);
-        String prestigeFormatted = Arrays.stream(prestige.name().toLowerCase().split("_"))
-                .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
-                .collect(Collectors.joining(" "));
+        String starFormatted = prestige.format(star);
+        String prestigeFormatted = prestige.nameFormatted();
         if (stats.getUUID().toString().equalsIgnoreCase("e8261512-53e9-469a-8015-6bd8bb896945")) {
             System.out.println("User is 1ist! We need the 1ist prestige!!!");
             starFormatted = "&8" + star + "&0✫";

@@ -46,12 +46,18 @@ public class HyStats {
         return Minecraft.getMinecraft().getNetHandler().getNetworkManager().getRemoteAddress();
     }
 
+    public static boolean isHypixel() {
+        return getConnectedServer().toString().contains("mc.hypixel.net");
+    }
+
     public static List<NetworkPlayerInfo> getOnlinePlayers() {
         return Minecraft.getMinecraft()
                 .getNetHandler()
                 .getPlayerInfoMap()
                 .stream()
                 .filter(Objects::nonNull)
+                .filter(npi ->
+                        !npi.getPlayerTeam().formatString("").toUpperCase().contains("NPC"))
                 .collect(Collectors.toList());
     }
 

@@ -1,7 +1,6 @@
 package net.cybercake.hystats.commands.stats;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.stats.categories.*;
@@ -10,9 +9,8 @@ import net.cybercake.hystats.hypixel.CachedPlayer;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
 import net.cybercake.hystats.utils.UChat;
+import net.cybercake.hystats.utils.UTabCompletions;
 import net.cybercake.hystats.utils.UUIDUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -20,7 +18,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -104,17 +101,24 @@ public class StatsCommandManager extends CommandBase {
                 return;
             }
 
-            final StatsCategoryCommand finalCommand = command;
+            RequestProcessor processor = RequestProcessor.create()
+                    .manager(this)
+                    .command(command)
+                    .sender(sender)
+                    .args(arguments)
+                    .compact(compact)
+                    .showUtilityMessages(true)
+                    .build();
             if (requestedPlayer.contains("*")) {
                 CompletableFuture.runAsync(() -> {
-                    this.findAllInLobby(sender, finalCommand, arguments);
+                    processor.mass().findAllInLobby();
                 });
                 return;
             }
 
             if (ImmutableList.of("-p", "-party", "--p", "--party").contains(requestedPlayer)) {
                 send(format("&7&oChecking your party...", null, false));
-                new CheckPartyList(sender, finalCommand, arguments);
+                new CheckPartyList(processor);
                 return;
             }
 
@@ -125,92 +129,13 @@ public class StatsCommandManager extends CommandBase {
                 send(format("&cThat player does not exist: &8" + requestedPlayer, null, true)); return;
             }
 
-            CompletableFuture.runAsync(() -> {
-                UChat.send(
-                        this.processRequest(sender, requestedPlayer, finalCommand, arguments, compact, true)
-                );
-            });
+            CompletableFuture.runAsync(() -> UChat.send(processor.processRequest(requestedPlayer)));
         } catch (Exception exception) {
             send(this.getError(exception, true));
         }
     }
 
-    private IChatComponent processRequest(ICommandSender sender, String requestedPlayer, StatsCategoryCommand command, Arguments args, boolean compact, boolean showUtilityMessages) {
-        try {
-            command.messages.clear();
-
-            long mss = System.currentTimeMillis();
-            UUID user = UUIDUtils.processUUID(requestedPlayer);
-            CachedPlayer player = HyStats.hypixel.getPlayer(user, UUIDUtils.isUUID(requestedPlayer) ? null : requestedPlayer);
-
-            System.out.println("[" + (System.currentTimeMillis() - mss) + "ms] Loading stats for " + user + "...");
-            if (player.isExpired()) {
-                if (showUtilityMessages) {
-                    UChat.send(format("&7&oLoading stats, please wait...", null, false));
-                }
-                player.grab();
-            }
-
-            GameStats stats = player.asGameStats(command.prefix, args);
-            System.out.println("[" + (System.currentTimeMillis() - mss) + "ms] Printing stats for " + user + " (user: " + stats.getUser() + ") in category " + command.name);
-            command.execute(sender, stats, args, compact);
-
-            IChatComponent sent = showUtilityMessages ? separator() : UChat.format("");
-            int index = 0;
-            for (IChatComponent chat : command.messages) {
-                sent = sent.appendSibling(UChat.format(compact ? (index > 0 ? " &8| " : "") : "\n"))
-                        .appendSibling(chat);
-                index++;
-            }
-            sent = sent.appendSibling(showUtilityMessages ? separator() : UChat.format(""));
-
-            return sent;
-        } catch (Exception error) {
-            return this.getError(error, showUtilityMessages);
-        }
-    }
-
-    private void findAllInLobby(ICommandSender sender, StatsCategoryCommand command, Arguments args) {
-        List<GameProfile> players = HyStats.getOnlinePlayers().stream().map(NetworkPlayerInfo::getGameProfile).limit(24).collect(Collectors.toList());
-        UChat.send(format(
-                "&7&oLoading stats of " + players.size() + " player" + (players.size() == 1 ? "" : "s") + ", please wait..."
-        ));
-
-        List<IChatComponent> components = new ArrayList<>();
-        for (GameProfile player : players) {
-            components.add(this.processRequest(sender, player.getName(), command, args, true, false));
-        }
-
-        send(UChat.separator());
-        components.forEach(UChat::send);
-        send(UChat.separator());
-    }
-
-    public void findAllInParty(ICommandSender sender, StatsCategoryCommand command, Arguments args, List<String> users, @Nullable Exception exception) {
-        if (exception != null) {
-            send(this.getError(exception, true));
-            return;
-        }
-
-        if (users.isEmpty()) {
-            send(format("&cYou are not currently in a party."));
-            return;
-        }
-
-        send(format("&7&oLoading stats of " + users.size() + " player" + (users.size() == 1 ? "" : "s") + ", please wait...", null, false));
-
-        List<IChatComponent> components = new ArrayList<>();
-        for (String user : users) {
-            components.add(this.processRequest(sender, user, command, args, true, false));
-        }
-
-        send(UChat.separator());
-        components.forEach(UChat::send);
-        send(UChat.separator());
-    }
-
-
-    private IChatComponent getError(Exception error, boolean showUtilityMessages) {
+    IChatComponent getError(Exception error, boolean showUtilityMessages) {
         error.printStackTrace(System.err);
 
         String hover = "&8" + error.toString();
@@ -226,12 +151,16 @@ public class StatsCommandManager extends CommandBase {
 
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
-        if (args.length == 1) {
-            return HyStats.getOnlinePlayers().stream().map(npi -> npi.getGameProfile().getName()).collect(Collectors.toList());
-        }
         if (args.length == 2) {
-            return commands.stream().map(scc -> scc.name).collect(Collectors.toList());
+            return UTabCompletions.tab(args[1],
+                    commands.stream().map(scc -> scc.name).collect(Collectors.toList())
+            );
         }
-        return null;
+        if (args.length == 1) {
+            return UTabCompletions.tab(args[0],
+                    HyStats.getOnlinePlayers().stream().map(npi -> npi.getGameProfile().getName()).collect(Collectors.toList())
+            );
+        }
+        return new ArrayList<>();
     }
 }
