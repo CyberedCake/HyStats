@@ -1,5 +1,6 @@
 package net.cybercake.hystats.utils;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public enum ColorCode {
@@ -54,5 +55,12 @@ public enum ColorCode {
 
     public static ColorCode getColor(String text) {
         return Arrays.stream(ColorCode.values()).filter(c -> c.name().equalsIgnoreCase(text)).findFirst().orElse(null);
+    }
+
+    public static String stripColor(@Nullable String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replaceAll("(?i)&[abcdef0-9klom]", "");
     }
 }

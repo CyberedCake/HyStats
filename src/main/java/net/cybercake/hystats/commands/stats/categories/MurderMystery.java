@@ -1,5 +1,6 @@
 package net.cybercake.hystats.commands.stats.categories;
 
+import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.utils.Time;
@@ -19,7 +20,7 @@ public class MurderMystery extends StatsCategoryCommand {
     }
 
     @Override
-    public void execute(ICommandSender sender, GameStats stats, boolean compact) {
+    public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
         double chanceDetective = stats.getDoubleProperty("detective_chance");
         double chanceMurderer = stats.getDoubleProperty("murderer_chance");
         double chanceAny = 100 - chanceMurderer - chanceDetective;

@@ -77,15 +77,11 @@ public class StatsCommandManager extends CommandBase {
             String requestedPlayer = args[0].replace(".", sender.getName());
 
             StatsCategoryCommand command = null;
-            Arguments arguments;
+            Arguments arguments = new Arguments(Arrays.copyOfRange(args, Math.min(2, args.length), args.length));
             if (args.length == 1) {
                 command = new BasicStats();
-                arguments = new Arguments(Arrays.copyOfRange(args, 0, args.length));
-            } else {
-                arguments = new Arguments(Arrays.copyOfRange(args, 1, args.length));
             }
-
-//            send(format("Arguments: " + arguments.toString()));
+            System.out.println("Using arguments: " + arguments.toString());
 
             for (StatsCategoryCommand cmd : commands) {
                 if (command != null) {
@@ -111,14 +107,14 @@ public class StatsCommandManager extends CommandBase {
             final StatsCategoryCommand finalCommand = command;
             if (requestedPlayer.contains("*")) {
                 CompletableFuture.runAsync(() -> {
-                    this.findAllInLobby(sender, finalCommand);
+                    this.findAllInLobby(sender, finalCommand, arguments);
                 });
                 return;
             }
 
             if (ImmutableList.of("-p", "-party", "--p", "--party").contains(requestedPlayer)) {
                 send(format("&7&oChecking your party...", null, false));
-                new CheckPartyList(sender, finalCommand);
+                new CheckPartyList(sender, finalCommand, arguments);
                 return;
             }
 
@@ -131,7 +127,7 @@ public class StatsCommandManager extends CommandBase {
 
             CompletableFuture.runAsync(() -> {
                 UChat.send(
-                        this.processRequest(sender, requestedPlayer, finalCommand, compact, true)
+                        this.processRequest(sender, requestedPlayer, finalCommand, arguments, compact, true)
                 );
             });
         } catch (Exception exception) {
@@ -139,7 +135,7 @@ public class StatsCommandManager extends CommandBase {
         }
     }
 
-    private IChatComponent processRequest(ICommandSender sender, String requestedPlayer, StatsCategoryCommand command, boolean compact, boolean showUtilityMessages) {
+    private IChatComponent processRequest(ICommandSender sender, String requestedPlayer, StatsCategoryCommand command, Arguments args, boolean compact, boolean showUtilityMessages) {
         try {
             command.messages.clear();
 
@@ -155,9 +151,9 @@ public class StatsCommandManager extends CommandBase {
                 player.grab();
             }
 
-            GameStats stats = player.asGameStats(command.prefix);
+            GameStats stats = player.asGameStats(command.prefix, args);
             System.out.println("[" + (System.currentTimeMillis() - mss) + "ms] Printing stats for " + user + " (user: " + stats.getUser() + ") in category " + command.name);
-            command.execute(sender, stats, compact);
+            command.execute(sender, stats, args, compact);
 
             IChatComponent sent = showUtilityMessages ? separator() : UChat.format("");
             int index = 0;
@@ -174,15 +170,15 @@ public class StatsCommandManager extends CommandBase {
         }
     }
 
-    private void findAllInLobby(ICommandSender sender, StatsCategoryCommand command) {
-        List<GameProfile> players = HyStats.getOnlinePlayers().subList(0, 24);
+    private void findAllInLobby(ICommandSender sender, StatsCategoryCommand command, Arguments args) {
+        List<GameProfile> players = HyStats.getOnlinePlayers().stream().map(NetworkPlayerInfo::getGameProfile).limit(24).collect(Collectors.toList());
         UChat.send(format(
                 "&7&oLoading stats of " + players.size() + " player" + (players.size() == 1 ? "" : "s") + ", please wait..."
         ));
 
         List<IChatComponent> components = new ArrayList<>();
         for (GameProfile player : players) {
-            components.add(this.processRequest(sender, player.getName(), command, true, false));
+            components.add(this.processRequest(sender, player.getName(), command, args, true, false));
         }
 
         send(UChat.separator());
@@ -190,7 +186,7 @@ public class StatsCommandManager extends CommandBase {
         send(UChat.separator());
     }
 
-    public void findAllInParty(ICommandSender sender, StatsCategoryCommand command, List<String> users, @Nullable Exception exception) {
+    public void findAllInParty(ICommandSender sender, StatsCategoryCommand command, Arguments args, List<String> users, @Nullable Exception exception) {
         if (exception != null) {
             send(this.getError(exception, true));
             return;
@@ -205,7 +201,7 @@ public class StatsCommandManager extends CommandBase {
 
         List<IChatComponent> components = new ArrayList<>();
         for (String user : users) {
-            components.add(this.processRequest(sender, user, command, true, false));
+            components.add(this.processRequest(sender, user, command, args, true, false));
         }
 
         send(UChat.separator());
@@ -231,7 +227,7 @@ public class StatsCommandManager extends CommandBase {
     @Override
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
         if (args.length == 1) {
-            return HyStats.getOnlinePlayers().stream().map(GameProfile::getName).collect(Collectors.toList());
+            return HyStats.getOnlinePlayers().stream().map(npi -> npi.getGameProfile().getName()).collect(Collectors.toList());
         }
         if (args.length == 2) {
             return commands.stream().map(scc -> scc.name).collect(Collectors.toList());

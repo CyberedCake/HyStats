@@ -26,6 +26,7 @@ public class CommandArgument {
     public boolean exists() {
         return this.get() != null;
     }
+    public boolean hasValue() { return this.exists() && !this.get().getClass().equals(NoValue.class); }
 
     public Object get() { return this.value; }
     public String getAsString() { return get(() -> this.value.toString(), null); }

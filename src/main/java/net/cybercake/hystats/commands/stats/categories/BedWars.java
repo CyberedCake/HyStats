@@ -1,5 +1,6 @@
 package net.cybercake.hystats.commands.stats.categories;
 
+import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.hypixel.leveling.BedWarsPrestige;
@@ -18,7 +19,7 @@ public class BedWars extends StatsCategoryCommand {
     }
 
     @Override
-    public void execute(ICommandSender sender, GameStats stats, boolean compact) {
+    public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
         int star = stats.player().getIntProperty("achievements.bedwars_level", 0);
         BedWarsPrestige prestige = BedWarsPrestige.valueOf(star);
         String starFormatted = BedWarsPrestige.format(star);

@@ -3,6 +3,7 @@ package net.cybercake.hystats.commands.stats.categories;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.hypixel.SocialMedia;
@@ -24,7 +25,7 @@ public class Socials extends StatsCategoryCommand {
 
 
     @Override
-    public void execute(ICommandSender sender, GameStats stats, boolean compact) {
+    public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
         JsonObject object = stats.getObjectProperty("links");
         Map<String, String> map = new Gson().fromJson(object, new TypeToken<Map<String, String>>() {}.getType());
         if (object == null || map.isEmpty()) {

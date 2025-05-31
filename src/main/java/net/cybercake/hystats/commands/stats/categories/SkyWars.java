@@ -1,5 +1,6 @@
 package net.cybercake.hystats.commands.stats.categories;
 
+import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.minecraft.command.ICommandSender;
@@ -14,7 +15,7 @@ public class SkyWars extends StatsCategoryCommand {
     }
 
     @Override
-    public void execute(ICommandSender sender, GameStats stats, boolean compact) {
+    public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
         String level = stats.getProperty("levelFormatted", "0✰");
 
         double wins = stats.getDoubleProperty("wins", 0D);

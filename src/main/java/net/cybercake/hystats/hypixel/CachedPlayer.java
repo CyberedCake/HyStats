@@ -1,5 +1,6 @@
 package net.cybercake.hystats.hypixel;
 
+import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
 import net.cybercake.hystats.hypixel.exceptions.UserNotPlayHypixelException;
 import net.cybercake.hystats.hypixel.exceptions.UnusualApiResponse;
@@ -57,8 +58,8 @@ public class CachedPlayer {
                 System.currentTimeMillis() - this.lastReply > ApiManager.EXPIRATION_SECONDS * 1_000L;
     }
 
-    public GameStats asGameStats(String prefix) {
-        return new GameStats(this, prefix);
+    public GameStats asGameStats(String prefix, Arguments args) {
+        return new GameStats(this, args, prefix);
     }
 
     <T> T notNull(T obj) {

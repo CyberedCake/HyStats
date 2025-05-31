@@ -1,11 +1,17 @@
 package net.cybercake.hystats.hypixel;
 
 import com.google.gson.JsonObject;
+import com.mojang.authlib.GameProfile;
+import net.cybercake.hystats.HyStats;
+import net.cybercake.hystats.commands.flags.Arguments;
+import net.cybercake.hystats.commands.flags.CommandArgument;
 import net.cybercake.hystats.utils.ColorCode;
 import net.cybercake.hystats.utils.UChat;
 import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.IChatComponent;
@@ -18,11 +24,37 @@ import static net.cybercake.hystats.utils.UChat.format;
 public class GameStats {
 
     private final CachedPlayer player;
-    private final String prefix;
+    private final Arguments args;
+    private final String apiPrefix;
 
-    GameStats(CachedPlayer player, @Nullable String prefix) {
+    private String displayName;
+
+    GameStats(CachedPlayer player, Arguments args, @Nullable String apiPrefix) {
         this.player = player;
-        this.prefix = prefix;
+        this.args = args;
+        this.apiPrefix = apiPrefix;
+
+        CommandArgument arg = this.args.arg("displayname", "dn");
+        this.displayName = this.player.displayName;
+        if (arg.exists()) {
+            NetworkPlayerInfo networkPlayerInfo = HyStats.getOnlinePlayers()
+                    .stream()
+                    .filter(npi -> npi.getGameProfile().getId().equals(this.getUUID()))
+                    .findFirst()
+                    .orElse(null);
+            if (networkPlayerInfo != null) {
+                IChatComponent profile = networkPlayerInfo.getDisplayName() != null
+                        ? networkPlayerInfo.getDisplayName()
+                        : UChat.format(networkPlayerInfo.getPlayerTeam().formatString(this.player.username));
+
+                this.displayName = profile.getFormattedText();
+                if (
+                        this.player.displayName != null && this.player.username != null &&
+                                !profile.getUnformattedText().equalsIgnoreCase(ColorCode.stripColor(this.player.displayName))) {
+                    this.displayName = this.player.displayName.replace(this.player.username, "") + profile.getFormattedText();
+                }
+            }
+        }
     }
 
     public int getIntProperty(String property) {
@@ -53,7 +85,10 @@ public class GameStats {
         return this.player().getStringProperty(concat(property), def);
     }
 
-    public String getUser() { return this.player.displayName; }
+    public String getUser() {
+        return this.displayName;
+    }
+
     public IChatComponent getUserWithGuild() {
         IChatComponent username = format(this.getUser());
         IChatComponent guildTag = format("");
@@ -77,8 +112,8 @@ public class GameStats {
 
 
     private String concat(String property) {
-        if (this.prefix == null) return property;
-        return this.prefix + "." + property;
+        if (this.apiPrefix == null) return property;
+        return this.apiPrefix + "." + property;
     }
 
 }

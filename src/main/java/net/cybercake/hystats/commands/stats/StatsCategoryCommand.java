@@ -1,5 +1,6 @@
 package net.cybercake.hystats.commands.stats;
 
+import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.utils.UChat;
 import net.minecraft.command.ICommandSender;
@@ -26,7 +27,8 @@ public abstract class StatsCategoryCommand {
         this.aliases = aliases;
     }
 
-    public abstract void execute(ICommandSender sender, GameStats stats, boolean compact);
+    public abstract void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact);
+
 
     public void text(IChatComponent message) {
         this.messages.add(message);

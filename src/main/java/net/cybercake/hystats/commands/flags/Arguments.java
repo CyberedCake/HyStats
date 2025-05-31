@@ -1,5 +1,7 @@
 package net.cybercake.hystats.commands.flags;
 
+import net.cybercake.hystats.utils.UChat;
+
 import javax.annotation.Nullable;
 import java.util.*;
 
@@ -11,12 +13,13 @@ public class Arguments {
         this.arguments = new HashMap<>();
 
         for (String arg : args) {
+
             if (!arg.startsWith("-")) continue;
 
             arg = arg.replace("-", "");
 
             if (!arg.contains("=")) {
-                this.arguments.put(arg, new CommandArgument(arg, null));
+                this.arguments.put(arg, new CommandArgument(arg, new NoValue()));
                 continue;
             }
 
@@ -25,7 +28,7 @@ public class Arguments {
         }
     }
 
-    public @Nullable CommandArgument arg(String name, String... aliases) {
+    public CommandArgument arg(String name, String... aliases) {
         String[] titles = Arrays.copyOf(aliases, aliases.length + 1);
         titles[aliases.length] = name;
 
@@ -34,9 +37,11 @@ public class Arguments {
             if (argument == null) {
                 continue;
             }
+            System.out.println("Found: " + argument);
             return argument;
         }
-        return null;
+        System.out.println("Not found argument");
+        return new CommandArgument(name, null);
     }
 
     @Override

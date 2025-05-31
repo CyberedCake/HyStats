@@ -46,13 +46,12 @@ public class HyStats {
         return Minecraft.getMinecraft().getNetHandler().getNetworkManager().getRemoteAddress();
     }
 
-    public static List<GameProfile> getOnlinePlayers() {
+    public static List<NetworkPlayerInfo> getOnlinePlayers() {
         return Minecraft.getMinecraft()
                 .getNetHandler()
                 .getPlayerInfoMap()
                 .stream()
                 .filter(Objects::nonNull)
-                .map(NetworkPlayerInfo::getGameProfile)
                 .collect(Collectors.toList());
     }
 
