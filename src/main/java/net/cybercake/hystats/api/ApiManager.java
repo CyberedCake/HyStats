@@ -1,5 +1,7 @@
 package net.cybercake.hystats.api;
 
+import com.google.common.collect.ImmutableList;
+import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.hypixel.CachedPlayer;
 import net.cybercake.hystats.utils.UChat;
 import net.hypixel.api.HypixelAPI;
@@ -7,8 +9,10 @@ import net.hypixel.api.apache.ApacheHttpClient;
 import net.hypixel.api.http.HypixelHttpClient;
 import net.hypixel.api.reply.PlayerReply;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -19,10 +23,12 @@ public class ApiManager {
     private HypixelAPI hypixelApi;
 
     private ApiKey key;
+    private int reloads;
     private final List<CachedPlayer> players;
 
     public ApiManager() {
         this.key = null;
+        this.reloads = 0;
         this.players = new ArrayList<>();
     }
 
@@ -46,7 +52,7 @@ public class ApiManager {
 
     public void reloadApi() {
         long mss = System.currentTimeMillis();
-        System.out.println("Checking for Hypixel API key...");
+        this.print("Checking for Hypixel API key...", System.out);
         if (this.key == null || !this.key.isCustom()) {
             this.key = new ApiKey("hypixel.api", "HYPIXEL_API_KEY");
         }
@@ -59,16 +65,24 @@ public class ApiManager {
             return;
         }
 
-        System.out.println("Discovered API key, proceeding with HyStats start-up...");
+        this.print("Discovered API key, establishing connection to API...", System.out);
 //        System.out.println("Key: " + apiKey);
 
         try {
             HypixelHttpClient client = new ApacheHttpClient(UUID.fromString(this.key.getApiKey()));
             this.hypixelApi = new HypixelAPI(client);
+            this.print("Connection established.", System.out);
 
-            // test to ensure API is working by finding Simon hypixel's player
+            // test to ensure API is working by finding test players
+            String testPlayer = ImmutableList.of(
+                            "f7c77d99-9f15-4a66-a87d-c4a51ef30d19", // simon hypixel
+                            "9b2a30ec-f8b3-4dfe-bf49-9c5c367383f8", // rezzus
+                            "b876ec32-e396-476b-a115-8438d83c67d4" // technoblade (never dies)
+                    )
+                    .get(this.reloads % 3);
+            this.print("Testing API key... (" + testPlayer + ")", System.out);
             PlayerReply.Player player = this.hypixelApi
-                    .getPlayerByUuid(UUID.fromString("f7c77d99-9f15-4a66-a87d-c4a51ef30d19"))
+                    .getPlayerByUuid(testPlayer)
                     .get(20, TimeUnit.SECONDS)
                     .getPlayer();
 
@@ -85,8 +99,9 @@ public class ApiManager {
             return;
         }
 
+        this.reloads++;
         this.players.clear(); // clear existing stored players from cache to make way for new ones (in case of reload)
-        System.out.println("Hypixel's API has been loaded with a valid key in " + (System.currentTimeMillis() - mss) + "ms!");
+        print("Hypixel's API has been loaded with a valid key in " + (System.currentTimeMillis() - mss) + "ms!", System.out);
     }
 
     public boolean isApiEnabled() {
@@ -102,13 +117,28 @@ public class ApiManager {
     }
 
     private void fail(String... additionalMessage) {
-        System.err.println(UChat.repeat("-", 50));
-        System.err.println("HYSTATS FAILURE!");
+        this.print(UChat.repeat("-", 50), System.err);
+        this.print("HYSTATS FAILURE!", System.err);
         for (String line : additionalMessage) {
-            System.err.println(line);
+            this.print(line, System.err);
         }
-        System.err.println(UChat.repeat("-", 50));
+        this.print(UChat.repeat("-", 50), System.err);
         this.hypixelApi = null;
+    }
+
+    private void print(String msg, PrintStream stream) {
+        if (HyStats.getConnectedServer() != null) {
+            try {
+                if (System.err.equals(stream)) {
+                    UChat.send(UChat.format("&c&o" + msg));
+                } else {
+                    UChat.send(UChat.format("&7&o" + msg));
+                }
+            } catch (Exception ignored) {
+                // who cares, this is a very debug-y feature anyways.
+            }
+        }
+        stream.println(msg);
     }
 
 

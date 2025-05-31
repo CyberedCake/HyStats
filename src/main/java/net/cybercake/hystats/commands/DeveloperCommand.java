@@ -26,16 +26,16 @@ import java.util.stream.Collectors;
 
 import static net.cybercake.hystats.utils.UChat.format;
 
-public class DebugCommand extends CommandBase {
+public class DeveloperCommand extends CommandBase {
 
     @Override
     public String getCommandName() {
-        return "$statsdebug";
+        return "$statsdev";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/$statsdebug";
+        return "/$statsdev";
     }
 
     @SuppressWarnings("CallToPrintStackTrace")
@@ -48,14 +48,22 @@ public class DebugCommand extends CommandBase {
             }
 
             if (args[0].equalsIgnoreCase("reloadapi")) {
+                // vvv in case someone finds this command by themselves. oh hi! you found the code for this bit :)
+                send("&cWARNING - This is very buggy behavior, if something goes wrong, restart your game.");
+
                 HyStats.hypixel.reloadApi();
-                send("&aReloaded the Hypixel API and invalidated all caches!");
+                if (HyStats.hypixel.isApiEnabled()) {
+                    send("&aReloaded the Hypixel API and invalidated all caches!");
+                } else {
+                    send("&cReloaded the Hypixel API and ran into an issue! Check logs.");
+                }
             } else if (args[0].equalsIgnoreCase("forcekey")) {
                 if (args.length < 2) {
                     send("&cMust provide key!"); return;
                 }
-                HyStats.hypixel.setKey(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
-                send("&aSet API key to &e" + );
+                HyStats.hypixel.setApiKey(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+                send("&aChanged API key!");
+                send("&7&oType &n" + this.getCommandUsage(sender) + " reloadapi&7&o to apply changes!");
             } else if (args[0].equalsIgnoreCase("bwlevel")) {
                 if (args.length < 3) {
                     int page;
@@ -150,7 +158,7 @@ public class DebugCommand extends CommandBase {
                         return;
                     }
 
-                    IChatComponent component = format("&6&lHyStats Debugger: &f" + args[1] + " is " + uuid);
+                    IChatComponent component = format("&6&lHyStats Dev: &f" + args[1] + " is " + uuid);
                     component.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, format("&eClick here to copy &b" + uuid + "&e (uuid of &a" + args[1] + "&e)!")));
                     component.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, uuid.toString()));
                     UChat.send(component);
@@ -160,17 +168,17 @@ public class DebugCommand extends CommandBase {
                 send("&cInvalid parameter!");
             }
         } catch (Exception exception) {
-            send("&cFailed to run debugger: &8" + exception);
+            send("&cFailed to run HyStats dev command: &8" + exception);
             exception.printStackTrace();
         }
     }
 
     private void send(String msg) {
-        UChat.send(format("&6&lHyStats Debug: &f" + msg, null, false));
+        UChat.send(format("&6&lHyStats Dev: &f" + msg, null, false));
     }
 
     private void send(String msg, @Nullable String hover) {
-        UChat.send(format("&6&lHyStats Debug: &f" + msg, hover, false));
+        UChat.send(format("&6&lHyStats Dev: &f" + msg, hover, false));
     }
 
     @Override
@@ -182,7 +190,7 @@ public class DebugCommand extends CommandBase {
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
         if (args.length == 1) {
             return UTabCompletions.tab(args[0],
-                    new ArrayList<>(ImmutableList.of("reloadapi", "bwlevel", "reloadspecialranks", "sendraw", "server", "uuid"))
+                    new ArrayList<>(ImmutableList.of("reloadapi", "forcekey", "bwlevel", "reloadspecialranks", "sendraw", "server", "uuid"))
             );
         }
         return null;

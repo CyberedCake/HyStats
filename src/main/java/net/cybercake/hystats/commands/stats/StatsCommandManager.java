@@ -60,7 +60,7 @@ public class StatsCommandManager extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         try {
             if (!HyStats.hypixel.isApiEnabled()) {
-                send(format("&cThe Hypixel API has been disabled and cannot continue.\n&7&oCheck your logs for more information! Try rebooting your game.", null, true));
+                send(format("&cThe Hypixel API has been disabled and cannot continue.\n&7&oCheck logs for more information! Try restarting your game.", null, true));
                 return;
             }
 

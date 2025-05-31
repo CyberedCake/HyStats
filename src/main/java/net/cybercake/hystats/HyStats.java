@@ -1,6 +1,6 @@
 package net.cybercake.hystats;
 
-import net.cybercake.hystats.commands.DebugCommand;
+import net.cybercake.hystats.commands.DeveloperCommand;
 import net.cybercake.hystats.commands.stats.StatsCommandManager;
 import net.cybercake.hystats.api.ApiManager;
 import net.cybercake.hystats.hypixel.ranks.SpecialHypixelRank;
@@ -25,7 +25,7 @@ public class HyStats {
     public void init(FMLInitializationEvent event) {
         command = new StatsCommandManager();
         ClientCommandHandler.instance.registerCommand(command);
-        ClientCommandHandler.instance.registerCommand(new DebugCommand());
+        ClientCommandHandler.instance.registerCommand(new DeveloperCommand());
 
         hypixel = new ApiManager();
         hypixel.reloadApi();
@@ -38,7 +38,11 @@ public class HyStats {
     }
 
     public static SocketAddress getConnectedServer() {
-        return Minecraft.getMinecraft().getNetHandler().getNetworkManager().getRemoteAddress();
+        try {
+            return Minecraft.getMinecraft().getNetHandler().getNetworkManager().getRemoteAddress();
+        } catch (Exception exception) {
+            return null;
+        }
     }
 
     public static boolean isHypixel() {
