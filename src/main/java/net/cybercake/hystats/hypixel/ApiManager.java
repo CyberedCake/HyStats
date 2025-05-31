@@ -39,6 +39,7 @@ public class ApiManager {
     public void reloadApi() {
         HypixelHttpClient client = new ApacheHttpClient(UUID.fromString(API_KEY));
         hypixelApi = new HypixelAPI(client);
+        players.clear();
         System.out.println("Hypixel's API has been loaded for " + HyStats.class.getCanonicalName());
     }
 

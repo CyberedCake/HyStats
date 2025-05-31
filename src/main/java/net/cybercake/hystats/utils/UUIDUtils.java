@@ -23,6 +23,11 @@ public class UUIDUtils {
         UUID uuid = cachedUsernames.get(username);
         if (uuid != null) return uuid;
 
+        // we know that the username was cached and we already knew about the fact it didn't exist
+        if (cachedUsernames.containsKey(username)) {
+            throw new UserNotExistException(6, username);
+        }
+
         // method two: search players in lobby
         uuid = Minecraft.getMinecraft()
                 .getNetHandler()
@@ -55,6 +60,7 @@ public class UUIDUtils {
 
             return returned;
         } catch (Exception exception) {
+            cachedUsernames.put(username, null);
             throw new UserNotExistException(6, username, exception);
         }
     }

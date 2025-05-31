@@ -1,11 +1,19 @@
 package net.cybercake.hystats.hypixel;
 
 import com.google.gson.JsonObject;
+import net.cybercake.hystats.utils.ColorCode;
+import net.cybercake.hystats.utils.UChat;
+import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
+import net.minecraft.util.IChatComponent;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
+
+import static net.cybercake.hystats.utils.UChat.format;
 
 public class GameStats {
 
@@ -46,8 +54,22 @@ public class GameStats {
     }
 
     public String getUser() { return this.player.displayName; }
+    public IChatComponent getUserWithGuild() {
+        IChatComponent username = format(this.getUser());
+        IChatComponent guildTag = format("");
+        if (this.guild() != null) {
+            guildTag = format("&" + ColorCode.getColor(this.guild().getTagColor()).getCode() + " [" + this.guild().getTag() + "]");
+            guildTag.getChatStyle().setChatClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/hystats " + this.getUUID() + " guild"));
+            guildTag.getChatStyle().setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    format("&eClick here to view " + this.getUser() + "&e'" + (this.getUser().endsWith("s") ? "" : "s") + " guild, &b" + this.guild().getName() + "&e!")));
+        }
+        return username.appendSibling(guildTag);
+    }
+
     public PlayerReply.Player player() { return this.player.notNull(this.player.playerReply).getPlayer(); }
     public StatusReply.Session session() { return this.player.notNull(this.player.statusReply).getSession(); }
+    public GuildReply.Guild guild() { return this.player.guildReply != null ? this.player.guildReply.getGuild() : null; }
+
     public String getUsername() { return this.player.username; }
     public UUID getUUID() { return this.player.getUniqueId(); }
 

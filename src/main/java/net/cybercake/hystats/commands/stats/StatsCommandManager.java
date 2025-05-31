@@ -3,6 +3,7 @@ package net.cybercake.hystats.commands.stats;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.HyStats;
+import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.stats.categories.*;
 import net.cybercake.hystats.events.CheckPartyList;
 import net.cybercake.hystats.hypixel.CachedPlayer;
@@ -15,6 +16,7 @@ import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.StringUtils;
 
@@ -75,9 +77,16 @@ public class StatsCommandManager extends CommandBase {
             String requestedPlayer = args[0].replace(".", sender.getName());
 
             StatsCategoryCommand command = null;
+            Arguments arguments;
             if (args.length == 1) {
                 command = new BasicStats();
+                arguments = new Arguments(Arrays.copyOfRange(args, 0, args.length));
+            } else {
+                arguments = new Arguments(Arrays.copyOfRange(args, 1, args.length));
             }
+
+//            send(format("Arguments: " + arguments.toString()));
+
             for (StatsCategoryCommand cmd : commands) {
                 if (command != null) {
                     break;
@@ -166,14 +175,7 @@ public class StatsCommandManager extends CommandBase {
     }
 
     private void findAllInLobby(ICommandSender sender, StatsCategoryCommand command) {
-        List<GameProfile> players = Minecraft.getMinecraft()
-                .getNetHandler()
-                .getPlayerInfoMap()
-                .stream()
-                .filter(Objects::nonNull)
-                .limit(24)
-                .map(NetworkPlayerInfo::getGameProfile)
-                .collect(Collectors.toList());
+        List<GameProfile> players = HyStats.getOnlinePlayers().subList(0, 24);
         UChat.send(format(
                 "&7&oLoading stats of " + players.size() + " player" + (players.size() == 1 ? "" : "s") + ", please wait..."
         ));
@@ -224,5 +226,16 @@ public class StatsCommandManager extends CommandBase {
             return format("&c" + error.getMessage().split("\\|E:")[0], hover, showUtilityMessages);
         }
         return format("&cAn error occurred while processing your request: &8" + error.toString().replace("\\|E:", ""), hover, showUtilityMessages);
+    }
+
+    @Override
+    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+        if (args.length == 1) {
+            return HyStats.getOnlinePlayers().stream().map(GameProfile::getName).collect(Collectors.toList());
+        }
+        if (args.length == 2) {
+            return commands.stream().map(scc -> scc.name).collect(Collectors.toList());
+        }
+        return null;
     }
 }

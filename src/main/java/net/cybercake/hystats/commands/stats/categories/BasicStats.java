@@ -5,7 +5,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
 import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.utils.ColorCode;
 import net.cybercake.hystats.utils.Time;
+import net.hypixel.api.reply.GuildReply;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
@@ -59,7 +61,7 @@ public class BasicStats extends StatsCategoryCommand {
                 );
         } else {
 
-            text("Stats of " + stats.getUser());
+            text(format("Stats of ").appendSibling(stats.getUserWithGuild()));
             text(" ");
             text("Hypixel Level: &6" + networkLevel);
             text("Achievement Points: &e" + achievementPoints);

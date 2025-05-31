@@ -5,6 +5,7 @@ import net.cybercake.hystats.hypixel.GameStats;
 import net.minecraft.command.ICommandSender;
 
 import static net.cybercake.hystats.utils.ApiUtils.formatDouble;
+import static net.cybercake.hystats.utils.UChat.format;
 
 public class SkyWars extends StatsCategoryCommand {
 
@@ -33,7 +34,7 @@ public class SkyWars extends StatsCategoryCommand {
             return;
         }
 
-        text("SkyWars Stats of " + stats.getUser());
+        text(format("SkyWars Stats of ").appendSibling(stats.getUserWithGuild()));
         text(" ");
         text("Level: &7" + level);
         text("Wins/Losses: &2" + formatDouble(wins) + " &7/ &4" + formatDouble(losses) + " &f(WLR: &6" + formatDouble((wins / losses), "#,###.00") + "&f)");

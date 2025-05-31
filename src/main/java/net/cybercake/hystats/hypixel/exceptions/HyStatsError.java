@@ -1,6 +1,6 @@
 package net.cybercake.hystats.hypixel.exceptions;
 
-// 9 next number
+// 10 next number
 public class HyStatsError extends RuntimeException {
 
     public HyStatsError(int code, String message) {

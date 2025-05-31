@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import static net.cybercake.hystats.utils.ApiUtils.formatDouble;
+import static net.cybercake.hystats.utils.UChat.format;
 
 public class BedWars extends StatsCategoryCommand {
 
@@ -49,7 +50,7 @@ public class BedWars extends StatsCategoryCommand {
             return;
         }
 
-        text("Bed Wars Stats of " + stats.getUser());
+        text(format("Bed Wars Stats of ").appendSibling(stats.getUserWithGuild()));
         text(" ");
         text("Level: &7" + starFormatted,
                 "&6Prestige:\n&f" + prestigeFormatted);

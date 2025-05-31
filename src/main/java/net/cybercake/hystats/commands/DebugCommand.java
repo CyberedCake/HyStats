@@ -1,5 +1,6 @@
 package net.cybercake.hystats.commands;
 
+import com.google.common.collect.ImmutableList;
 import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.hypixel.exceptions.UserNotExistException;
 import net.cybercake.hystats.hypixel.leveling.BedWarsPrestige;
@@ -11,10 +12,13 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -42,10 +46,10 @@ public class DebugCommand extends CommandBase {
                 return;
             }
 
-            if (args[0].equalsIgnoreCase("--reload-api")) {
+            if (args[0].equalsIgnoreCase("reloadapi")) {
                 HyStats.hypixel.reloadApi();
-                send("&aReloaded the Hypixel API!");
-            } else if (args[0].equalsIgnoreCase("--parse-bw-level")) {
+                send("&aReloaded the Hypixel API and invalidated all caches!");
+            } else if (args[0].equalsIgnoreCase("bwlevel")) {
                 if (args.length < 2) {
                     send("&cMust provide number!");
                     return;
@@ -53,7 +57,7 @@ public class DebugCommand extends CommandBase {
 
                 int level;
                 try {
-                    level = Integer.parseInt(args[1]);
+                    level = Math.abs(Integer.parseInt(args[1]));
                 } catch (NumberFormatException exception) {
                     send("&cMust provide VALID integer!"); return;
                 }
@@ -64,12 +68,12 @@ public class DebugCommand extends CommandBase {
                                 .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
                                 .collect(Collectors.joining(" "))
                 );
-            } else if (args[0].equalsIgnoreCase("--reload-special-ranks")) {
+            } else if (args[0].equalsIgnoreCase("reloadspecialranks")) {
 
                 SpecialHypixelRank.createSpecialHypixelRanks();
                 send("&aReloaded the special ranks!");
 
-            } else if (args[0].equalsIgnoreCase("--send-raw")) {
+            } else if (args[0].equalsIgnoreCase("sendraw")) {
 
                 if (args.length < 2) {
                     send("&cMust provide text!");
@@ -77,11 +81,11 @@ public class DebugCommand extends CommandBase {
                 }
 
                 send((String.join(" ", Arrays.copyOfRange(args, 1, args.length))));
-            } else if (args[0].equalsIgnoreCase("--server")) {
+            } else if (args[0].equalsIgnoreCase("server")) {
 
                 send(HyStats.getConnectedServer().toString());
 
-            } else if (args[0].equalsIgnoreCase("--uuid-of")) {
+            } else if (args[0].equalsIgnoreCase("uuid")) {
 
                 if (args.length < 2) {
                     send("&cMust provide username!");
@@ -123,5 +127,13 @@ public class DebugCommand extends CommandBase {
     @Override
     public boolean canCommandSenderUseCommand(ICommandSender sender) {
         return true;
+    }
+
+    @Override
+    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+        if (args.length == 1) {
+            return new ArrayList<>(ImmutableList.of("reloadapi", "bwlevel", "reloadspecialranks", "sendraw", "server", "uuid"));
+        }
+        return null;
     }
 }

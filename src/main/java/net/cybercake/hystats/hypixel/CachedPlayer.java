@@ -1,10 +1,11 @@
 package net.cybercake.hystats.hypixel;
 
 import net.cybercake.hystats.hypixel.exceptions.HyStatsError;
-import net.cybercake.hystats.hypixel.exceptions.NonExistentApiResponse;
+import net.cybercake.hystats.hypixel.exceptions.UserNotPlayHypixelException;
 import net.cybercake.hystats.hypixel.exceptions.UnusualApiResponse;
 import net.cybercake.hystats.hypixel.exceptions.UserNotExistException;
 import net.cybercake.hystats.hypixel.ranks.HypixelRank;
+import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
 
@@ -22,6 +23,7 @@ public class CachedPlayer {
     long lastReply;
     @Nullable PlayerReply playerReply;
     @Nullable StatusReply statusReply;
+    @Nullable GuildReply guildReply;
 
     @Nullable String username;
     @Nullable String displayName;
@@ -61,7 +63,7 @@ public class CachedPlayer {
 
     <T> T notNull(T obj) {
         if (obj == null) {
-            throw new NonExistentApiResponse();
+            throw new UserNotPlayHypixelException(4, this.uuid, this.username);
         }
         return obj;
     }
@@ -72,19 +74,21 @@ public class CachedPlayer {
 
             PlayerReply player = this.api.hypixel().getPlayerByUuid(uuid).get(5, TimeUnit.SECONDS);
             StatusReply status = this.api.hypixel().getStatus(uuid).get(5, TimeUnit.SECONDS);
+            GuildReply guild = this.api.hypixel().getGuildByPlayer(uuid).get(5, TimeUnit.SECONDS);
 
             if (!player.getPlayer().exists()) {
-                if (this.username != null) {
-                    throw new UserNotExistException(1, this.username);
-                }
-                throw new UserNotExistException(1, this.uuid);
+                throw new UserNotPlayHypixelException(1, this.uuid, this.username);
             }
 
             this.playerReply = player;
             this.statusReply = status;
+            this.guildReply = guild;
+
             this.displayName = HypixelRank.getRank(this.playerReply.getPlayer()).format(this.playerReply.getPlayer());
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new UnusualApiResponse(e);
+        } catch (UserNotPlayHypixelException e) {
+            throw e;
         } catch (Exception exception) {
             throw new HyStatsError(2, exception.toString());
         }

@@ -31,7 +31,7 @@ public class Socials extends StatsCategoryCommand {
             text(stats.getUser() + " &chas no social media set!"); return;
         }
 
-        text(stats.getUser() + "&f" + (stats.player().getName().endsWith("s") ? "'" : "'s") + " " + (compact ? "SM" : "Linked Social Media"),
+        text(stats.getUser() + "&f'" + (stats.player().getName().endsWith("s") ? "" : "s") + " " + (compact ? "SM" : "Linked Social Media"),
                 compact ? "&eClick here to expand " + stats.getUser() : null,
                 compact ? "/hystats " + stats.getUUID() + " " + this.name : null
                 );

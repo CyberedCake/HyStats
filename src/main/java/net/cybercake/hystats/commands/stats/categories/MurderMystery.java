@@ -52,7 +52,7 @@ public class MurderMystery extends StatsCategoryCommand {
             return;
         }
 
-        text("Murder Mystery Stats of " + stats.getUser());
+        text(format("Murder Mystery Stats of ").appendSibling(stats.getUserWithGuild()));
         text(" ");
         text(showAll("Chances", "&aAs Innocent::&a" + formatDouble(chanceAny) + "%", formatDouble(chanceMurderer) + "%", formatDouble(chanceDetective) + "%"));
         text(showAll("Wins", formatDouble(wins), formatDouble(winsMurderer), formatDouble(winsDetective)));

@@ -1,10 +1,12 @@
 package net.cybercake.hystats;
 
+import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.commands.DebugCommand;
 import net.cybercake.hystats.commands.stats.StatsCommandManager;
 import net.cybercake.hystats.hypixel.ApiManager;
 import net.cybercake.hystats.hypixel.ranks.SpecialHypixelRank;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -14,6 +16,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
 import java.net.SocketAddress;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Mod(modid = "hystats", useMetadata=true)
 public class HyStats {
@@ -39,6 +44,16 @@ public class HyStats {
 
     public static SocketAddress getConnectedServer() {
         return Minecraft.getMinecraft().getNetHandler().getNetworkManager().getRemoteAddress();
+    }
+
+    public static List<GameProfile> getOnlinePlayers() {
+        return Minecraft.getMinecraft()
+                .getNetHandler()
+                .getPlayerInfoMap()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(NetworkPlayerInfo::getGameProfile)
+                .collect(Collectors.toList());
     }
 
 }
