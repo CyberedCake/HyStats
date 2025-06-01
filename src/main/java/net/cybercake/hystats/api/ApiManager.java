@@ -54,7 +54,12 @@ public class ApiManager {
         long mss = System.currentTimeMillis();
         this.print("Checking for Hypixel API key...", System.out);
         if (this.key == null || !this.key.isCustom()) {
-            this.key = new ApiKey("hypixel.api", "HYPIXEL_API_KEY");
+            try {
+                this.key = new ApiKey("hypixel.api", "HYPIXEL_API_KEY");
+            } catch (NullPointerException nullPointerException) {
+                // should still be null :(
+                this.key = null;
+            }
         }
 
         if (this.key == null) {
