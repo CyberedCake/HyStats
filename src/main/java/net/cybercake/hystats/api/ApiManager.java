@@ -80,7 +80,7 @@ public class ApiManager {
                             "b876ec32-e396-476b-a115-8438d83c67d4" // technoblade (never dies)
                     )
                     .get(this.reloads % 3);
-            this.print("Testing API key... (" + testPlayer + ")", System.out);
+            this.print("Testing API key... (tester: " + testPlayer.substring(0, 13) + "...)", System.out);
             PlayerReply.Player player = this.hypixelApi
                     .getPlayerByUuid(testPlayer)
                     .get(20, TimeUnit.SECONDS)

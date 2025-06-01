@@ -2,6 +2,7 @@ package net.cybercake.hystats.commands;
 
 import com.google.common.collect.ImmutableList;
 import net.cybercake.hystats.HyStats;
+import net.cybercake.hystats.events.JoinServerEvent;
 import net.cybercake.hystats.exceptions.UserNotExistException;
 import net.cybercake.hystats.hypixel.leveling.BedWarsPrestige;
 import net.cybercake.hystats.hypixel.ranks.SpecialHypixelRank;
@@ -139,9 +140,13 @@ public class DeveloperCommand extends CommandBase {
                 send(" ");
                 UChat.send(format(String.join(" ", Arrays.copyOfRange(args, 1, args.length))));
             } else if (args[0].equalsIgnoreCase("server")) {
+                if (HyStats.getConnectedServer() == null) {
+                    // unlikely to be called
+                    send("&cNo server detected");
+                    return;
+                }
 
                 send(HyStats.getConnectedServer().toString());
-
             } else if (args[0].equalsIgnoreCase("uuid")) {
 
                 if (args.length < 2) {
@@ -164,6 +169,12 @@ public class DeveloperCommand extends CommandBase {
                     UChat.send(component);
                 });
 
+            } else if (args[0].equalsIgnoreCase("welcome")) {
+                send("Enqueued welcome message. Wait five seconds.");
+                this.processCommand(sender, new String[]{"version"});
+                JoinServerEvent.enqueueWelcomeMessage();
+            } else if (args[0].equalsIgnoreCase("version")) {
+                send("HyStats v" + HyStats.VERSION + ", state: " + (HyStats.firstRun ? "new" : "existing"));
             } else {
                 send("&cInvalid parameter!");
             }
@@ -190,7 +201,10 @@ public class DeveloperCommand extends CommandBase {
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
         if (args.length == 1) {
             return UTabCompletions.tab(args[0],
-                    new ArrayList<>(ImmutableList.of("reloadapi", "forcekey", "bwlevel", "reloadspecialranks", "sendraw", "server", "uuid"))
+                    new ArrayList<>(ImmutableList.of(
+                            "reloadapi", "forcekey", "bwlevel", "reloadspecialranks",
+                            "sendraw", "server", "uuid", "welcome", "version"
+                    ))
             );
         }
         return null;

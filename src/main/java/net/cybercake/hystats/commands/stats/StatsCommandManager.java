@@ -166,6 +166,6 @@ public class StatsCommandManager extends CommandBase {
                     HyStats.getOnlinePlayers().stream().map(npi -> npi.getGameProfile().getName()).collect(Collectors.toList())
             );
         }
-        return new ArrayList<>();
+        return null;
     }
 }
