@@ -32,7 +32,6 @@ public class ApiManager {
         this.players = new ArrayList<>();
     }
 
-
     public CachedPlayer getPlayer(UUID uuid) {
         return this.getPlayer(uuid, null);
     }
@@ -122,12 +121,12 @@ public class ApiManager {
     }
 
     private void fail(String... additionalMessage) {
-        this.print(UChat.repeat("-", 50), System.err);
+        this.print(UChat.repeat("-", 53), System.err);
         this.print("HYSTATS FAILURE!", System.err);
         for (String line : additionalMessage) {
             this.print(line, System.err);
         }
-        this.print(UChat.repeat("-", 50), System.err);
+        this.print(UChat.repeat("-", 53), System.err);
         this.hypixelApi = null;
     }
 

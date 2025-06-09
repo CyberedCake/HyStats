@@ -95,4 +95,8 @@ public class UUIDUtils {
         }
     }
 
+    public static void flushCache() {
+        UUIDUtils.cachedUsernames.clear();
+    }
+
 }

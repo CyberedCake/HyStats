@@ -52,12 +52,20 @@ public class DeveloperCommand extends CommandBase {
                 // vvv in case someone finds this command by themselves. oh hi! you found the code for this bit :)
                 send("&cWARNING - This is very buggy behavior, if something goes wrong, restart your game.");
 
-                HyStats.hypixel.reloadApi();
-                if (HyStats.hypixel.isApiEnabled()) {
-                    send("&aReloaded the Hypixel API and invalidated all caches!");
-                } else {
-                    send("&cReloaded the Hypixel API and ran into an issue! Check logs.");
-                }
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000);
+                        HyStats.hypixel.reloadApi();
+                        if (HyStats.hypixel.isApiEnabled()) {
+                            send("&aReloaded the Hypixel API and invalidated all caches!");
+                        } else {
+                            send("&cReloaded the Hypixel API and ran into an issue! Check logs.");
+                        }
+                    } catch (Exception exception) {
+                        exception.printStackTrace(System.err);
+                        send("&cReloaded the Hypixel API and ran into an issue! Check logs.");
+                    }
+                }).start();
             } else if (args[0].equalsIgnoreCase("forcekey")) {
                 if (args.length < 2) {
                     send("&cMust provide key!"); return;
