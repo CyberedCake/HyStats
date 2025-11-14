@@ -3,13 +3,13 @@ package net.cybercake.hystats.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
+import net.cybercake.hystats.exceptions.UnusualApiResponse;
 import net.cybercake.hystats.exceptions.UserNotExistException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 
@@ -43,24 +43,42 @@ public class UUIDUtils {
             return uuid;
         }
 
+        InputStream input = null;
+        InputStreamReader inputReader = null;
+        BufferedReader reader = null;
+
         // method three: finally, if all else fails, fetch from api.mojang.com
-        String url = "https://api.mojang.com/users/profiles/minecraft/" + username;
+        String url = "https://api.minecraftservices.com/minecraft/profile/lookup/name/" + username;
         try {
-            URL realUrl = new URL(url);
-            InputStream input = realUrl.openStream();
-            InputStreamReader inputReader = new InputStreamReader(input);
-            BufferedReader reader = new BufferedReader(inputReader);
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("GET");
+
+            int status = connection.getResponseCode();
+            if (status == 404) { // 404 NOT FOUND
+                throw new UserNotExistException(10, username);
+            } else if (status != 200) { // 200 OK
+                throw new UnusualApiResponse("Unexpected HTTP response code: " + status);
+            }
+
+            input = connection.getInputStream();
+            inputReader = new InputStreamReader(input);
+            reader = new BufferedReader(inputReader);
 
             JsonObject obj = new JsonParser().parse(reader).getAsJsonObject();
             String stringUuid = convertUUID(obj.get("id").getAsString());
+            String stringName = obj.get("name").getAsString();
+
             UUID returned = UUID.fromString(stringUuid);
 
-            cachedUsernames.put(username, returned);
+            cachedUsernames.put(stringName, returned);
+
+            close(input, inputReader, reader);
 
             return returned;
         } catch (Exception exception) {
             cachedUsernames.put(username, null);
-            throw new UserNotExistException(6, username, exception);
+            close(input, inputReader, reader);
+            throw new UserNotExistException(10, username, exception);
         }
     }
 
@@ -97,6 +115,19 @@ public class UUIDUtils {
 
     public static void flushCache() {
         UUIDUtils.cachedUsernames.clear();
+    }
+
+
+    private static void close(Closeable... closeable) {
+        try {
+            for (Closeable c : closeable) {
+                if (c == null) continue;
+                c.close();
+            }
+        } catch (IOException io) {
+            System.err.println("Failed to close: " + io);
+            io.printStackTrace(System.err);
+        }
     }
 
 }

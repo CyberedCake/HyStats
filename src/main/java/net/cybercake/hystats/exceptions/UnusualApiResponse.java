@@ -6,4 +6,8 @@ public class UnusualApiResponse extends HyStatsError {
         super(3, throwable);
     }
 
+    public UnusualApiResponse(String explanation) {
+        super(11, explanation);
+    }
+
 }

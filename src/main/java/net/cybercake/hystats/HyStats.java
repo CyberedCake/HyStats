@@ -6,6 +6,7 @@ import net.cybercake.hystats.commands.DeveloperCommand;
 import net.cybercake.hystats.commands.stats.StatsCommandManager;
 import net.cybercake.hystats.api.ApiManager;
 import net.cybercake.hystats.events.JoinServerEvent;
+import net.cybercake.hystats.exceptions.ExceptionManager;
 import net.cybercake.hystats.hypixel.ranks.SpecialHypixelRank;
 import net.cybercake.hystats.tick.TickSyncer;
 import net.cybercake.hystats.utils.VersionData;
@@ -31,6 +32,7 @@ public class HyStats {
 
     public static ApiManager hypixel;
     public static StatsCommandManager command;
+    public static ExceptionManager exceptions;
     public static TickSyncer tick;
 
     public static boolean firstRun;
@@ -82,6 +84,8 @@ public class HyStats {
         command = new StatsCommandManager();
         ClientCommandHandler.instance.registerCommand(command);
         ClientCommandHandler.instance.registerCommand(new DeveloperCommand());
+
+        exceptions = new ExceptionManager();
 
         MinecraftForge.EVENT_BUS.register(new JoinServerEvent());
 

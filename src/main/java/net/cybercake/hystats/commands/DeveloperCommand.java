@@ -2,13 +2,20 @@ package net.cybercake.hystats.commands;
 
 import com.google.common.collect.ImmutableList;
 import net.cybercake.hystats.HyStats;
+import net.cybercake.hystats.api.ApiManager;
+import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.events.JoinServerEvent;
 import net.cybercake.hystats.exceptions.UserNotExistException;
+import net.cybercake.hystats.hypixel.CachedPlayer;
+import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.hypixel.leveling.BedWarsPrestige;
+import net.cybercake.hystats.hypixel.ranks.HypixelRank;
 import net.cybercake.hystats.hypixel.ranks.SpecialHypixelRank;
 import net.cybercake.hystats.utils.UChat;
 import net.cybercake.hystats.utils.UTabCompletions;
 import net.cybercake.hystats.utils.UUIDUtils;
+import net.hypixel.api.reply.RecentGamesReply;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -57,7 +64,7 @@ public class DeveloperCommand extends CommandBase {
                         Thread.sleep(1000);
                         HyStats.hypixel.reloadApi();
                         if (HyStats.hypixel.isApiEnabled()) {
-                            send("&aReloaded the Hypixel API and invalidated all caches!");
+                            send("&aReloaded the Hypixel API and flushed cache!");
                         } else {
                             send("&cReloaded the Hypixel API and ran into an issue! Check logs.");
                         }
@@ -68,11 +75,23 @@ public class DeveloperCommand extends CommandBase {
                 }).start();
             } else if (args[0].equalsIgnoreCase("forcekey")) {
                 if (args.length < 2) {
-                    send("&cMust provide key!"); return;
+                    send("&cMust provide key!");
+                    return;
                 }
                 HyStats.hypixel.setApiKey(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
                 send("&aChanged API key!");
                 send("&7&oType &n" + this.getCommandUsage(sender) + " reloadapi&7&o to apply changes!");
+            } else if (args[0].equalsIgnoreCase("ranks")) {
+                GameStats player = HyStats.hypixel.getPlayer(Minecraft.getMinecraft().thePlayer.getUniqueID()).asGameStats(null, Arguments.empty());
+
+                send("Hypixel Ranks");
+                for (HypixelRank rank : HypixelRank.values()) {
+                    try {
+                        send(rank.format(player.player()));
+                    } catch (Exception exception) {
+                        send("&c" + exception);
+                    }
+                }
             } else if (args[0].equalsIgnoreCase("bwlevel")) {
                 if (args.length < 3) {
                     int page;

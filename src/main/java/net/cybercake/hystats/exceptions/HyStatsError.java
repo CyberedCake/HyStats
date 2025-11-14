@@ -1,10 +1,12 @@
 package net.cybercake.hystats.exceptions;
 
-// 10 next number
+import net.cybercake.hystats.HyStats;
+
+// 12 next number
 public class HyStatsError extends RuntimeException {
 
     public HyStatsError(int code, String message) {
-        super(message + "&d|E:" + code);
+        super(message);
     }
 
     public HyStatsError(int code, Throwable cause) {

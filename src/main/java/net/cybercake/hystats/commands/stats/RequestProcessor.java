@@ -2,13 +2,16 @@ package net.cybercake.hystats.commands.stats;
 
 import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.commands.flags.Arguments;
+import net.cybercake.hystats.commands.processors.Processors;
 import net.cybercake.hystats.hypixel.CachedPlayer;
 import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.utils.TriState;
 import net.cybercake.hystats.utils.UChat;
 import net.cybercake.hystats.utils.UUIDUtils;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.IChatComponent;
 
+import java.util.List;
 import java.util.UUID;
 
 import static net.cybercake.hystats.utils.UChat.format;
@@ -44,9 +47,14 @@ public class RequestProcessor {
 
             GameStats stats = player.asGameStats(this.params.command.prefix, this.params.args);
             System.out.println("[" + (System.currentTimeMillis() - mss) + "ms] Printing stats for " + user + " (user: " + stats.getUser() + ") in category " + this.params.command.name);
+            if (stats.isStaffStatsHidden().bool()) {
+                System.out.println("[" + (System.currentTimeMillis() - mss) + "ms] Searched for staff with their information hidden!");
+            }
+
             this.params.command.execute(this.params.sender, stats, this.params.args, this.params.compact);
 
             IChatComponent sent = this.params.showUtilityMessages ? separator() : UChat.format("");
+
             int index = 0;
             for (IChatComponent chat : this.params.command.messages) {
                 sent = sent.appendSibling(UChat.format(this.params.compact ? (index > 0 ? " &8| " : "") : "\n"))
@@ -73,6 +81,7 @@ public class RequestProcessor {
         ICommandSender sender;
         StatsCategoryCommand command;
         Arguments args;
+        Processors processors;
         boolean compact, showUtilityMessages;
 
         public RequestParameters manager(StatsCommandManager manager) {
@@ -89,6 +98,10 @@ public class RequestProcessor {
 
         public RequestParameters args(Arguments args) {
             this.args = args; return this;
+        }
+
+        public RequestParameters processors(Processors processors) {
+            this.processors = processors; return this;
         }
 
         public RequestParameters compact(boolean compact) {

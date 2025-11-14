@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.commands.flags.Arguments;
+import net.cybercake.hystats.commands.processors.Processors;
 import net.cybercake.hystats.commands.stats.categories.*;
 import net.cybercake.hystats.events.CheckPartyList;
 import net.cybercake.hystats.exceptions.HyStatsError;
@@ -68,6 +69,8 @@ public class StatsCommandManager extends CommandBase {
                 send(format("&cInvalid usage! &7" + this.getCommandUsage(sender), null, true)); return;
             }
 
+
+
             boolean compact;
             if (args[0].startsWith(":")) {
                 compact = true;
@@ -79,11 +82,14 @@ public class StatsCommandManager extends CommandBase {
             String requestedPlayer = args[0].replace(".", sender.getName());
 
             StatsCategoryCommand command = null;
-            Arguments arguments = new Arguments(Arrays.copyOfRange(args, Math.min(2, args.length), args.length));
+            final String[] trimmedArguments = Arrays.copyOfRange(args, Math.min(2, args.length), args.length);
+            Processors processors = new Processors(trimmedArguments);
+            Arguments arguments = new Arguments(processors.removeData());
             if (args.length == 1) {
                 command = new BasicStats();
             }
             System.out.println("Using arguments: " + arguments.toString());
+            System.out.println("| With processors: " + processors.toString());
 
             for (StatsCategoryCommand cmd : commands) {
                 if (command != null) {
@@ -106,6 +112,7 @@ public class StatsCommandManager extends CommandBase {
                     .command(command)
                     .sender(sender)
                     .args(arguments)
+                    .processors(processors)
                     .compact(compact)
                     .showUtilityMessages(true)
                     .build();
@@ -128,7 +135,7 @@ public class StatsCommandManager extends CommandBase {
             }
 
             if ((requestedPlayer.length() > 16
-                    || !StringUtils.isAlphanumeric(requestedPlayer.replace("_", "")))
+                    || !StringUtils.isAlphanumeric(requestedPlayer.replace( "_", "")))
                     && !UUIDUtils.isUUID(requestedPlayer)
             ) {
                 send(format("&cThat player does not exist: &8" + requestedPlayer, null, true)); return;

@@ -41,6 +41,8 @@ public class MassSearchPlayersUtility {
             components.add(this.processor.processRequest(user));
         }
 
+        components = this.processor.params.processors.streamList(components);
+
         send(UChat.separator());
         components.forEach(UChat::send);
         send(UChat.separator());
@@ -55,6 +57,8 @@ public class MassSearchPlayersUtility {
         for (GameProfile player : players) {
             components.add(this.processor.processRequest(player.getName()));
         }
+
+        components = this.processor.params.processors.streamList(components);
 
         send(UChat.separator());
         components.forEach(UChat::send);

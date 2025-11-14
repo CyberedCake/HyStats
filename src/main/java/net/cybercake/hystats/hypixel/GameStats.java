@@ -6,6 +6,7 @@ import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.flags.CommandArgument;
 import net.cybercake.hystats.utils.ColorCode;
+import net.cybercake.hystats.utils.TriState;
 import net.cybercake.hystats.utils.UChat;
 import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
@@ -85,6 +86,10 @@ public class GameStats {
 
     public String getUser() {
         return this.displayName;
+    }
+
+    public TriState isStaffStatsHidden() {
+        return this.player.staffHidden;
     }
 
     public IChatComponent getUserWithGuild() {

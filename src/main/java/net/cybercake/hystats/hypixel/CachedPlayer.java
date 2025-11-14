@@ -7,6 +7,8 @@ import net.cybercake.hystats.exceptions.UserNotPlayHypixelException;
 import net.cybercake.hystats.exceptions.UnusualApiResponse;
 import net.cybercake.hystats.exceptions.UserNotExistException;
 import net.cybercake.hystats.hypixel.ranks.HypixelRank;
+import net.cybercake.hystats.utils.TriState;
+import net.cybercake.hystats.utils.UChat;
 import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
@@ -30,6 +32,8 @@ public class CachedPlayer {
     @Nullable String username;
     @Nullable String displayName;
 
+    TriState staffHidden;
+
     public CachedPlayer(ApiManager api, UUID uuid) {
         this(api, uuid, null);
     }
@@ -47,6 +51,7 @@ public class CachedPlayer {
         this.statusReply = null;
 
         this.username = this.displayName = username;
+        this.staffHidden = TriState.UNSET;
     }
 
     public UUID getUniqueId() {
@@ -86,13 +91,18 @@ public class CachedPlayer {
             this.statusReply = status;
             this.guildReply = guild;
 
-            this.displayName = HypixelRank.getRank(this.playerReply.getPlayer()).format(this.playerReply.getPlayer());
+            HypixelRank rank = HypixelRank.getRank(this.playerReply.getPlayer());
+            this.displayName = rank.format(this.playerReply.getPlayer());
+
+            if (rank == HypixelRank.STAFF) {
+                this.staffHidden = TriState.from(this.playerReply.getPlayer().getProperty("stats") == null);
+            }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new UnusualApiResponse(e);
         } catch (UserNotPlayHypixelException e) {
             throw e;
         } catch (Exception exception) {
-            throw new HyStatsError(2, exception.toString());
+            throw new HyStatsError(2, exception);
         }
     }
 

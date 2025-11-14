@@ -1,6 +1,7 @@
 package net.cybercake.hystats.api;
 
 import com.google.common.base.Preconditions;
+import net.cybercake.hystats.utils.UUIDUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintStream;
@@ -16,6 +17,7 @@ public class ApiKey {
 
     ApiKey(String key, boolean custom) {
         Preconditions.checkNotNull(key, "No API key was passed in");
+        Preconditions.checkArgument(UUIDUtils.isUUID(key), "API Key is not a valid UUID");
 
         this.key = key;
         this.custom = custom;

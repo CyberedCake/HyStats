@@ -7,6 +7,10 @@ import java.util.*;
 
 public class Arguments {
 
+    public static Arguments empty() {
+        return new Arguments(new String[]{});
+    }
+
     private final Map<String, CommandArgument> arguments;
 
     public Arguments(String[] args) {
