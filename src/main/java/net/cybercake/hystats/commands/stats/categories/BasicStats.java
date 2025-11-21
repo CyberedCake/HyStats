@@ -29,11 +29,12 @@ public class BasicStats extends StatsCategoryCommand {
 
     @Override
     public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
-        String networkLevel = formatDouble(stats.player().getNetworkLevel());
-        String achievementPoints = formatDouble(stats.getIntProperty("achievementPoints", 0));
-        String karma = formatDouble(stats.player().getKarma());
+        String networkLevel = formatDouble(stats.registerStat("Level", double.class, stats.player().getNetworkLevel()));
+        String achievementPoints = formatDouble(stats.getIntProperty("AchievementPoints", "achievementPoints", 0));
+        String karma = formatDouble(stats.registerStat("Karma", long.class, stats.player().getKarma()));
 
         String firstLoginHover = "&6First Login:\n&f" + stats.player().getFirstLoginDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm:ss z"));
+        stats.registerStat("FirstLogin", long.class, stats.player().getFirstLoginDate().toEpochSecond());
 
         boolean online = stats.session().isOnline();
         String onlineStatus;
@@ -48,11 +49,12 @@ public class BasicStats extends StatsCategoryCommand {
             unix = stats.player().getLastLogoutDate();
             onlineStatusHover = "&6Offline Since:\n&f" + unix.format(DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm:ss z"));
         }
+        stats.registerStat("OnlineStatus", long.class, unix.toEpochSecond());
 
         if (compact) {
 
             text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID());
-            text("HL: &6" + networkLevel);
+            text("Level: &6" + networkLevel);
             text("AP: &e" + achievementPoints);
             text("Age: &2" + Time.getDuration(System.currentTimeMillis() / 1_000, stats.player().getFirstLoginDate().toEpochSecond(), false), firstLoginHover);
 
@@ -64,12 +66,12 @@ public class BasicStats extends StatsCategoryCommand {
 
             text(format("Stats of ").appendSibling(stats.getUserWithGuild()));
             text(" ");
-            text("Hypixel Level: &6" + networkLevel);
+            text("Level: &6" + networkLevel);
             text("Achievement Points: &e" + achievementPoints);
             text("Karma: &d" + karma);
             text("First Login: &2" + Time.getDuration(System.currentTimeMillis() / 1_000, stats.player().getFirstLoginDate().toEpochSecond(), true) + " ago",
                     firstLoginHover);
-            JsonObject object = stats.getObjectProperty("socialMedia.links");
+            JsonObject object = stats.getObjectProperty("SocialMedia", "socialMedia.links");
             Map<String, String> map = new Gson().fromJson(object, new TypeToken<Map<String, String>>() {
             }.getType());
             if (object != null && !map.isEmpty()) {

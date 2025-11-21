@@ -17,14 +17,22 @@ public class SkyWars extends StatsCategoryCommand {
     @Override
     public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
         String level = stats.getProperty("levelFormatted", "0✰");
+        stats.registerStat("Level", int.class, Integer.parseInt(level.replaceAll("\\D+", "")));
 
-        double wins = stats.getDoubleProperty("wins", 0D);
-        double losses = stats.getDoubleProperty("losses", 0D);
+        double wins = stats.getDoubleProperty("Wins", "wins", 0D);
+        double losses = stats.getDoubleProperty("Losses", "losses", 0D);
+        stats.registerStat("WLR", double.class, wins / losses);
 
-        double kills = stats.getDoubleProperty("kills", 0D);
-        double deaths = stats.getDoubleProperty("deaths", 0D);
+        double kills = stats.getDoubleProperty("Kills", "kills", 0D);
+        double deaths = stats.getDoubleProperty("Deaths", "deaths", 0D);
+        stats.registerStat("KDR", double.class, kills / deaths);
 
-        int winstreak = stats.getIntProperty("win_streak", -1);
+        int winstreak = stats.getIntProperty("Winstreak", "win_streak", -1);
+
+        int souls = stats.getIntProperty("Souls", "souls", 0);
+        int heads = stats.getIntProperty("Heads", "heads", 0);
+        int coins = stats.getIntProperty("Coins", "coins", 0);
+        int tokens = stats.getIntProperty("Tokens", "cosmetic_tokens", 0);
 
         if (compact) {
             text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
@@ -40,9 +48,9 @@ public class SkyWars extends StatsCategoryCommand {
         text("Level: &7" + level);
         text("Wins/Losses: &2" + formatDouble(wins) + " &7/ &4" + formatDouble(losses) + " &f(WLR: &6" + formatDouble((wins / losses), "#,###.00") + "&f)");
         text("Kills/Deaths: &a" + formatDouble(kills) + " &7/ &c" + formatDouble(deaths) + " &f(KDR: &6" + formatDouble(kills / deaths, "#,###.00") + "&f)");
-        text("Souls: &b" + formatDouble(stats.getIntProperty("souls", 0)));
-        text("Heads: &5" + formatDouble(stats.getIntProperty("heads", 0)));
-        text("Coins/Tokens: &6" + formatDouble(stats.getIntProperty("coins", 0)) + " &7/ &2" + formatDouble(stats.getIntProperty("cosmetic_tokens", 0)));
+        text("Souls: &b" + formatDouble(souls));
+        text("Heads: &5" + formatDouble(heads));
+        text("Coins/Tokens: &6" + formatDouble(coins) + " &7/ &2" + formatDouble(tokens));
         text("Winstreak: &d" + (winstreak == -1 ? "&cDisabled" : winstreak), winstreak == -1 ? "&cThis user has disabled Winstreak visibility!" : null);
     }
 }

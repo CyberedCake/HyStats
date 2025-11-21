@@ -21,20 +21,22 @@ public class MurderMystery extends StatsCategoryCommand {
 
     @Override
     public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
-        double chanceDetective = stats.getDoubleProperty("detective_chance");
-        double chanceMurderer = stats.getDoubleProperty("murderer_chance");
+        double chanceDetective = stats.getDoubleProperty("DetectiveChance", "detective_chance");
+        double chanceMurderer = stats.getDoubleProperty("MurdererChance", "murderer_chance");
         double chanceAny = 100 - chanceMurderer - chanceDetective;
 
-        double wins = stats.getDoubleProperty("wins", 0D);
-        double winsDetective = stats.getDoubleProperty("detective_wins", 0D);
-        double winsMurderer = stats.getDoubleProperty("murderer_wins", 0D);
+        double wins = stats.getDoubleProperty("Wins", "wins", 0D);
+        double winsDetective = stats.getDoubleProperty("DetectiveWins", "detective_wins", 0D);
+        double winsMurderer = stats.getDoubleProperty("MurdererWins", "murderer_wins", 0D);
 
-        double kills = stats.getDoubleProperty("kills", 0D);
-        double killsDetective = stats.getDoubleProperty("bow_kills", 0D);
-        double killsMurderer = stats.getDoubleProperty("knife_kills", 0D);
+        double kills = stats.getDoubleProperty("Kills", "kills", 0D);
+        double killsDetective = stats.getDoubleProperty("BowKills", "bow_kills", 0D);
+        double killsMurderer = stats.getDoubleProperty("KnifeKills", "knife_kills", 0D);
 
-        int quickestDetectiveWin = stats.getIntProperty("quickest_detective_win_time_seconds", -1);
-        int quickestMurdererWin = stats.getIntProperty("quickest_murderer_win_time_seconds", -1);
+        int quickestDetectiveWin = stats.getIntProperty("QuickestDetectiveWin", "quickest_detective_win_time_seconds", -1);
+        int quickestMurdererWin = stats.getIntProperty("QuickestMurdererWin", "quickest_murderer_win_time_seconds", -1);
+
+        int coins = stats.getIntProperty("Coins", "coins", 0);
 
         if (compact) {
             text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
@@ -59,7 +61,7 @@ public class MurderMystery extends StatsCategoryCommand {
         text(showAll("Wins", formatDouble(wins), formatDouble(winsMurderer), formatDouble(winsDetective)));
         text(showAll("Kills", formatDouble(kills), formatDouble(killsMurderer), formatDouble(killsDetective)));
         text(showAll("Fastest Win", null, Time.formatBasicSeconds(quickestMurdererWin), Time.formatBasicSeconds(quickestDetectiveWin)));
-        text("&fTokens: &2" + formatDouble(stats.getIntProperty("coins", 0)));
+        text("&fTokens: &2" + formatDouble(coins));
     }
 
     private IChatComponent showAll(String title, @Nullable String total, String murderer, String detective) {

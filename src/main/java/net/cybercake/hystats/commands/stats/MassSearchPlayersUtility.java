@@ -1,12 +1,16 @@
 package net.cybercake.hystats.commands.stats;
 
 import com.mojang.authlib.GameProfile;
+import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.utils.Pair;
 import net.cybercake.hystats.utils.UChat;
 import net.minecraft.util.IChatComponent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static net.cybercake.hystats.utils.UChat.format;
 import static net.cybercake.hystats.utils.UChat.send;
@@ -36,15 +40,15 @@ public class MassSearchPlayersUtility {
                 .showUtilityMessages(false)
                 .compact(true);
 
-        List<IChatComponent> components = new ArrayList<>();
+        Map<IChatComponent, GameStats> componentStats = new HashMap<>();
         for (String user : users) {
-            components.add(this.processor.processRequest(user));
+            componentStats.putAll(this.processor.processRequest(user).asSmallMap());
         }
 
-        components = this.processor.params.processors.streamList(components);
+        componentStats = this.processor.params.processors.streamList(componentStats);
 
         send(UChat.separator());
-        components.forEach(UChat::send);
+        componentStats.keySet().forEach(UChat::send);
         send(UChat.separator());
     }
 

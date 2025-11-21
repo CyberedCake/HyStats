@@ -8,6 +8,7 @@ import net.cybercake.hystats.commands.flags.CommandArgument;
 import net.cybercake.hystats.utils.ColorCode;
 import net.cybercake.hystats.utils.TriState;
 import net.cybercake.hystats.utils.UChat;
+import net.cybercake.hystats.utils.VariableObject;
 import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
@@ -18,11 +19,25 @@ import net.minecraft.event.HoverEvent;
 import net.minecraft.util.IChatComponent;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static net.cybercake.hystats.utils.UChat.format;
 
 public class GameStats {
+
+    public static class StatCard extends VariableObject {
+        public final String name;
+        public final Class<?> type;
+
+        public StatCard(String name, Class<?> resultType, @org.jetbrains.annotations.Nullable Object obj) {
+            super(obj);
+            this.name = name;
+            this.type = resultType;
+        }
+    }
 
     private final CachedPlayer player;
     private final Arguments args;
@@ -30,13 +45,16 @@ public class GameStats {
 
     private String displayName;
 
+    private final List<StatCard> accessedStats;
+
     GameStats(CachedPlayer player, Arguments args, @Nullable String apiPrefix) {
         this.player = player;
         this.args = args;
         this.apiPrefix = apiPrefix;
 
-        CommandArgument arg = this.args.arg("displayname", "dn");
+        CommandArgument arg = this.args.arg("displayname", "dn", "d");
         this.displayName = this.player.displayName;
+        this.accessedStats = new ArrayList<>();
         if (arg.exists()) {
             HyStats.getOnlinePlayers()
                     .stream()
@@ -56,32 +74,32 @@ public class GameStats {
         }
     }
 
-    public int getIntProperty(String property) {
-        return this.getIntProperty(property, -1);
+    public int getIntProperty(String humanName, String property) {
+        return this.getIntProperty(humanName, property, -1);
     }
 
-    public int getIntProperty(String property, int def) {
-        return this.player().getIntProperty(concat(property), def);
+    public int getIntProperty(String humanName, String property, int def) {
+        return this.registerStat(humanName, int.class, this.player().getIntProperty(concat(property), def));
     }
 
-    public double getDoubleProperty(String property) {
-        return this.getDoubleProperty(property, -1);
+    public double getDoubleProperty(String humanName, String property) {
+        return this.getDoubleProperty(humanName, property, -1);
     }
 
-    public double getDoubleProperty(String property, double def) {
-        return this.player().getDoubleProperty(concat(property), def);
+    public double getDoubleProperty(String humanName, String property, double def) {
+        return this.registerStat(humanName, double.class, this.player().getDoubleProperty(concat(property), def));
     }
 
-    public JsonObject getObjectProperty(String property) {
-        return this.player().getObjectProperty(concat(property));
+    public JsonObject getObjectProperty(String humanName, String property) {
+        return this.registerStat(humanName, JsonObject.class, this.player().getObjectProperty(concat(property)));
     }
 
-    public String getProperty(String property) {
-        return this.getProperty(property, null);
+    public String getProperty(String humanName, String property) {
+        return this.getProperty(humanName, property, null);
     }
 
-    public String getProperty(String property, String def) {
-        return this.player().getStringProperty(concat(property), def);
+    public String getProperty(String humanName, String property, String def) {
+        return this.registerStat(humanName, String.class, this.player().getStringProperty(concat(property), def));
     }
 
     public String getUser() {
@@ -116,6 +134,10 @@ public class GameStats {
     public String getUsername() { return this.player.username; }
     public UUID getUUID() { return this.player.getUniqueId(); }
 
+    public <T> T registerStat(String humanName, Class<T> type, T stat) {
+        this.accessedStats.add(new StatCard(humanName, type, stat));
+        return stat;
+    }
 
 
 

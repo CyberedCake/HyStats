@@ -26,7 +26,7 @@ public class Socials extends StatsCategoryCommand {
 
     @Override
     public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
-        JsonObject object = stats.getObjectProperty("links");
+        JsonObject object = stats.getObjectProperty("SocialMedia", "links");
         Map<String, String> map = new Gson().fromJson(object, new TypeToken<Map<String, String>>() {}.getType());
         if (object == null || map.isEmpty()) {
             text(stats.getUser() + " &chas no social media set!"); return;

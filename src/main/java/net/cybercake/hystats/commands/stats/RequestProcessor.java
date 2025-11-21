@@ -5,6 +5,7 @@ import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.processors.Processors;
 import net.cybercake.hystats.hypixel.CachedPlayer;
 import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.utils.Pair;
 import net.cybercake.hystats.utils.TriState;
 import net.cybercake.hystats.utils.UChat;
 import net.cybercake.hystats.utils.UUIDUtils;
@@ -29,7 +30,7 @@ public class RequestProcessor {
         this.params = params;
     }
 
-    public IChatComponent processRequest(String requestedPlayer) {
+    public Pair<IChatComponent, GameStats> processRequest(String requestedPlayer) {
         try {
             this.params.command.messages.clear();
 
@@ -63,9 +64,9 @@ public class RequestProcessor {
             }
             sent = sent.appendSibling(this.params.showUtilityMessages ? separator() : UChat.format(""));
 
-            return sent;
+            return new Pair<>(sent, stats);
         } catch (Exception error) {
-            return this.params.manager.getError(error, this.params.showUtilityMessages);
+            return new Pair<>(this.params.manager.getError(error, this.params.showUtilityMessages), null);
         }
     }
 

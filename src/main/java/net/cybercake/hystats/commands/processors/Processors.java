@@ -1,5 +1,7 @@
 package net.cybercake.hystats.commands.processors;
 
+import net.cybercake.hystats.commands.processors.filter.StatFilterTool;
+import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.utils.UChat;
 import net.minecraft.util.IChatComponent;
 
@@ -28,6 +30,7 @@ public class Processors {
         processors.put("highlight", new HighlightTool());
         processors.put("join", new JoinTool());
         processors.put("redirect", new RedirectPipe());
+        processors.put("stat", new StatFilterTool());
 
         ProcessorBuilder builder = null;
         for (int i = 0; i < args.length; i++) {
@@ -77,7 +80,7 @@ public class Processors {
         return Arrays.copyOfRange(args, 0, this.startIndex);
     }
 
-    public List<IChatComponent> streamList(List<IChatComponent> components) {
+    public Map<IChatComponent, GameStats> streamList(Map<IChatComponent, GameStats> components) {
         System.out.println("Streaming list of chat components via " + Processors.class.getCanonicalName() + "!");
         for (Map.Entry<StreamOp, List<String>> op : this.thisCommandProcessors.entrySet()) {
             String[] args = op.getValue().toArray(new String[0]);
@@ -86,10 +89,18 @@ public class Processors {
         }
 
         if (components.isEmpty()) {
-            components.add(UChat.format("&cNo results."));
+            components.put(UChat.format("&cNo returned results.", "&cProcessors: &8" + this, false), null);
         }
 
         return components;
     }
 
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(", ", "Processors[", "]");
+        for (Map.Entry<StreamOp, List<String>> op : this.thisCommandProcessors.entrySet()) {
+            joiner.add("{" + op.getKey().getClass().getCanonicalName() + ", args: " + op.getValue().toString() + "}");
+        }
+        return joiner.toString();
+    }
 }

@@ -21,6 +21,7 @@ public class BedWars extends StatsCategoryCommand {
     @Override
     public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
         int star = stats.player().getIntProperty("achievements.bedwars_level", 0);
+        stats.registerStat("Star", int.class, star);
         BedWarsPrestige prestige = BedWarsPrestige.valueOf(star);
         String starFormatted = prestige.format(star);
         String prestigeFormatted = prestige.nameFormatted();
@@ -30,13 +31,18 @@ public class BedWars extends StatsCategoryCommand {
             prestigeFormatted = "1ist";
         }
 
-        double wins = stats.getDoubleProperty("wins_bedwars", 0D);
-        double losses = stats.getDoubleProperty("losses_bedwars", 0D);
+        int kills = stats.getIntProperty("Kills", "kills_bedwars", 0);
+        int coins = stats.getIntProperty("Coins", "coins", 0);
 
-        double finalKills = stats.getDoubleProperty("final_kills_bedwars", 0D);
-        double finalDeaths = stats.getDoubleProperty("final_deaths_bedwars", 0D);
+        double wins = stats.getDoubleProperty("Wins", "wins_bedwars", 0D);
+        double losses = stats.getDoubleProperty("Losses", "losses_bedwars", 0D);
+        stats.registerStat("WLR", double.class, wins / losses);
 
-        int winstreak = stats.getIntProperty("winstreak", -1);
+        double finalKills = stats.getDoubleProperty("FinalKills", "final_kills_bedwars", 0D);
+        double finalDeaths = stats.getDoubleProperty("FinalDeaths", "final_deaths_bedwars", 0D);
+        stats.registerStat("FKDR", double.class, finalKills / finalDeaths);
+
+        int winstreak = stats.getIntProperty("Winstreak", "winstreak", -1);
 
         if (compact) {
             text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
@@ -55,8 +61,8 @@ public class BedWars extends StatsCategoryCommand {
                 "&6Prestige:\n&f" + prestigeFormatted);
         text("Wins/Losses: &2" + formatDouble(wins) + " &7/ &4" + formatDouble(losses) + " &f(WLR: &6" + formatDouble((wins / losses), "#,###.00") + "&f)");
         text("Final Kills/Deaths: &a" + formatDouble(finalKills) + " &7/ &c" + formatDouble(finalDeaths) + " &f(FKDR: &6" + formatDouble(finalKills / finalDeaths, "#,###.00") + "&f)");
-        text("Kills: &e" + formatDouble(stats.getIntProperty("kills_bedwars", 0)));
-        text("Coins: &6" + formatDouble(stats.getIntProperty("coins", 0)));
+        text("Kills: &e" + formatDouble(kills));
+        text("Coins: &6" + formatDouble(coins));
         text("Winstreak: &d" + (winstreak == -1 ? "&cDisabled" : winstreak), winstreak == -1 ? "&cThis user has disabled Winstreak visibility!" : null);
     }
 }
