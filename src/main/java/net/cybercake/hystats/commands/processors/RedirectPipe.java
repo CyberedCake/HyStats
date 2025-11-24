@@ -15,7 +15,7 @@ public class RedirectPipe implements StreamOp{
     public Map<IChatComponent, GameStats> apply(Map<IChatComponent, GameStats> input, String[] args) {
         String uneditedCommand = String.join(" ", args).toLowerCase();
         if (!uneditedCommand.contains("$fmsg") && !uneditedCommand.contains("$msg")) {
-            return CollectionUtils.singletonMap(UChat.format("&cExpected placeholder '$msg' or '$fmsg' in arguments, found none.", "&cArguments: &8" + uneditedCommand, false), null);
+            return CollectionUtils.singleItemMap(UChat.format("&cExpected placeholder '$msg' or '$fmsg' in arguments, found none.", "&cArguments: &8" + uneditedCommand, false), null);
         }
 
         for (int i = 0; i < input.size(); i++) {

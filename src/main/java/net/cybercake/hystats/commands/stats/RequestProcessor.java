@@ -13,6 +13,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.util.IChatComponent;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static net.cybercake.hystats.utils.UChat.format;
@@ -64,8 +65,11 @@ public class RequestProcessor {
             }
             sent = sent.appendSibling(this.params.showUtilityMessages ? separator() : UChat.format(""));
 
+            System.out.println("Returning: " + sent.getUnformattedText() + ", stats=" + stats);
+
             return new Pair<>(sent, stats);
         } catch (Exception error) {
+            System.out.println("Returning: error for " + error);
             return new Pair<>(this.params.manager.getError(error, this.params.showUtilityMessages), null);
         }
     }

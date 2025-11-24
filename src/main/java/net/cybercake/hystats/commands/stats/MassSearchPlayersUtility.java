@@ -57,10 +57,14 @@ public class MassSearchPlayersUtility {
         this.processor.params
                 .showUtilityMessages(false)
                 .compact(true);
+        System.out.println("Will be processing many players here shortly");
 
         Map<IChatComponent, GameStats> components = new HashMap<>();
         for (GameProfile player : players) {
-            components.putAll(this.processor.processRequest(player.getName()).asSmallMap());
+            Map<IChatComponent, GameStats> temp = this.processor.processRequest(player.getName());
+            System.out.println("Now in loop, temp=" + temp);
+            components.putAll(temp);
+            System.out.println("Complete components=" + components);
         }
 
         if (this.processor.params.processors.countActiveProcessors() != 0)

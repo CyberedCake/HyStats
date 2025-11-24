@@ -20,6 +20,11 @@ public class Pair<A, B> {
     }
 
     public Map<A, B> asSmallMap() {
-        return CollectionUtils.singletonMap(this.first, this.second);
+        return CollectionUtils.singleItemMap(this.first, this.second);
+    }
+
+    @Override
+    public String toString() {
+        return "Pair[first=" + this.first + ", second=" + this.second + "]";
     }
 }
