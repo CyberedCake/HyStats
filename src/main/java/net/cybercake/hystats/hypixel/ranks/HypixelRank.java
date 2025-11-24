@@ -1,5 +1,7 @@
 package net.cybercake.hystats.hypixel.ranks;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.cybercake.hystats.utils.ColorCode;
 import net.hypixel.api.reply.PlayerReply;
 
@@ -83,6 +85,19 @@ public enum HypixelRank {
             prefix = this.apply.apply(player, prefix);
         }
         return prefix + player.getName();
+    }
+
+    public String format(String name) {
+        String prefix = meta.prefix;
+        if (apply != null) {
+            // default expected values
+            JsonObject fakePlayer = new JsonObject();
+            fakePlayer.addProperty("rankPlusColor", "RED");
+            fakePlayer.addProperty("monthlyRankColor", "GOLD");
+
+            prefix = this.apply.apply(new PlayerReply.Player(fakePlayer), prefix);
+        }
+        return prefix + name;
     }
 
 }

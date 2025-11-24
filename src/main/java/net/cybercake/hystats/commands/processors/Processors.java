@@ -95,6 +95,8 @@ public class Processors {
         return components;
     }
 
+    public int countActiveProcessors() { return this.thisCommandProcessors.size(); }
+
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(", ", "Processors[", "]");

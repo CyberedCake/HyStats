@@ -37,6 +37,17 @@ public class StatsCommandManager extends CommandBase {
         commands.add(new Socials());
     }
 
+    public static StatsCategoryCommand getStatsClass(String text) {
+        for (StatsCategoryCommand cmd : commands) {
+            if (text.equalsIgnoreCase(cmd.name)
+                    || (cmd.aliases.length > 0 && Arrays.stream(cmd.aliases).anyMatch(s -> s.equalsIgnoreCase(text)))
+            ) {
+                return cmd;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String getCommandName() {
         return "stats";
@@ -85,22 +96,11 @@ public class StatsCommandManager extends CommandBase {
             final String[] trimmedArguments = Arrays.copyOfRange(args, Math.min(2, args.length), args.length);
             Processors processors = new Processors(trimmedArguments);
             Arguments arguments = new Arguments(processors.removeData());
-            if (args.length == 1) {
-                command = new BasicStats();
-            }
             System.out.println("Using arguments: " + arguments.toString());
             System.out.println("| With processors: " + processors.toString());
 
-            for (StatsCategoryCommand cmd : commands) {
-                if (command != null) {
-                    break;
-                }
-                if (args[1].equalsIgnoreCase(cmd.name)
-                        || (cmd.aliases.length > 0 && Arrays.stream(cmd.aliases).anyMatch(s -> s.equalsIgnoreCase(args[1])))
-                ) {
-                    command = cmd;
-                }
-            }
+            if (args.length == 1)   command = new BasicStats();
+            else                    command = getStatsClass(args[1]);
 
             if (command == null) {
                 send(format("&cInvalid category: &8" + args[1] + "\n&cType &7/stats help &cfor help!", null, true));
@@ -141,7 +141,7 @@ public class StatsCommandManager extends CommandBase {
                 send(format("&cThat player does not exist: &8" + requestedPlayer, null, true)); return;
             }
 
-            CompletableFuture.runAsync(() -> UChat.send(processor.processRequest(requestedPlayer)));
+            CompletableFuture.runAsync(() -> UChat.send(processor.processRequest(requestedPlayer).first()));
         } catch (Exception exception) {
             send(this.getError(exception, true));
         }

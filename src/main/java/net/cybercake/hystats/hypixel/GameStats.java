@@ -37,6 +37,11 @@ public class GameStats {
             this.name = name;
             this.type = resultType;
         }
+
+        @Override
+        public String toString() {
+            return "StatCard[name=" + name + ", type=" + type.getCanonicalName() + ", value=" + this.get() + "]";
+        }
     }
 
     private final CachedPlayer player;
@@ -138,6 +143,12 @@ public class GameStats {
         this.accessedStats.add(new StatCard(humanName, type, stat));
         return stat;
     }
+
+    public StatCard findStat(String humanName) {
+        return this.accessedStats.stream().filter(s -> s.name.equalsIgnoreCase(humanName)).findFirst().orElse(null);
+    }
+
+    public List<StatCard> findAccessedStats() { return this.accessedStats; }
 
 
 

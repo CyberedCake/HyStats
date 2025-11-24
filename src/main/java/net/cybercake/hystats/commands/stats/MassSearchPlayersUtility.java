@@ -45,7 +45,8 @@ public class MassSearchPlayersUtility {
             componentStats.putAll(this.processor.processRequest(user).asSmallMap());
         }
 
-        componentStats = this.processor.params.processors.streamList(componentStats);
+        if (this.processor.params.processors.countActiveProcessors() != 0)
+            componentStats = this.processor.params.processors.streamList(componentStats);
 
         send(UChat.separator());
         componentStats.keySet().forEach(UChat::send);
@@ -57,15 +58,16 @@ public class MassSearchPlayersUtility {
                 .showUtilityMessages(false)
                 .compact(true);
 
-        List<IChatComponent> components = new ArrayList<>();
+        Map<IChatComponent, GameStats> components = new HashMap<>();
         for (GameProfile player : players) {
-            components.add(this.processor.processRequest(player.getName()));
+            components.putAll(this.processor.processRequest(player.getName()).asSmallMap());
         }
 
-        components = this.processor.params.processors.streamList(components);
+        if (this.processor.params.processors.countActiveProcessors() != 0)
+            components = this.processor.params.processors.streamList(components);
 
         send(UChat.separator());
-        components.forEach(UChat::send);
+        components.keySet().forEach(UChat::send);
         send(UChat.separator());
     }
 

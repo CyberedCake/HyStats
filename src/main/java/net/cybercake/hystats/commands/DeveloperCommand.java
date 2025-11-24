@@ -4,6 +4,10 @@ import com.google.common.collect.ImmutableList;
 import net.cybercake.hystats.HyStats;
 import net.cybercake.hystats.api.ApiManager;
 import net.cybercake.hystats.commands.flags.Arguments;
+import net.cybercake.hystats.commands.processors.Processors;
+import net.cybercake.hystats.commands.stats.RequestProcessor;
+import net.cybercake.hystats.commands.stats.StatsCategoryCommand;
+import net.cybercake.hystats.commands.stats.StatsCommandManager;
 import net.cybercake.hystats.events.JoinServerEvent;
 import net.cybercake.hystats.exceptions.UserNotExistException;
 import net.cybercake.hystats.hypixel.CachedPlayer;
@@ -11,6 +15,7 @@ import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.hypixel.leveling.BedWarsPrestige;
 import net.cybercake.hystats.hypixel.ranks.HypixelRank;
 import net.cybercake.hystats.hypixel.ranks.SpecialHypixelRank;
+import net.cybercake.hystats.utils.Pair;
 import net.cybercake.hystats.utils.UChat;
 import net.cybercake.hystats.utils.UTabCompletions;
 import net.cybercake.hystats.utils.UUIDUtils;
@@ -73,6 +78,32 @@ public class DeveloperCommand extends CommandBase {
                         send("&cReloaded the Hypixel API and ran into an issue! Check logs.");
                     }
                 }).start();
+            } else if (args[0].equalsIgnoreCase("findaccessedstats")) {
+                if (args.length < 2) {
+                    send("&cMust provide category!");
+                    return;
+                }
+                StatsCategoryCommand command = StatsCommandManager.getStatsClass(args[1]);
+                if (command == null) {
+                    send("&cInvalid category!");
+                    return;
+                }
+                RequestProcessor processor = RequestProcessor.create()
+                        .manager(new StatsCommandManager())
+                        .command(command)
+                        .sender(sender)
+                        .args(new Arguments(new String[]{}))
+                        .processors(new Processors(new String[]{}))
+                        .compact(true)
+                        .showUtilityMessages(true)
+                        .build();
+                GameStats stats = processor.processRequest(sender.getName()).second();
+                List<GameStats.StatCard> cards = stats.findAccessedStats();
+                send("&f&lYour Stats, accessed by &b" + command.name + "&f&l:");
+                for (int i = 0; i < cards.size(); i++) {
+                    GameStats.StatCard card = cards.get(i);
+                    send((i % 2 == 0 ? "&7" : "&f") + card.toString());
+                }
             } else if (args[0].equalsIgnoreCase("forcekey")) {
                 if (args.length < 2) {
                     send("&cMust provide key!");
@@ -82,14 +113,17 @@ public class DeveloperCommand extends CommandBase {
                 send("&aChanged API key!");
                 send("&7&oType &n" + this.getCommandUsage(sender) + " reloadapi&7&o to apply changes!");
             } else if (args[0].equalsIgnoreCase("ranks")) {
-                GameStats player = HyStats.hypixel.getPlayer(Minecraft.getMinecraft().thePlayer.getUniqueID()).asGameStats(null, Arguments.empty());
+                GameStats player = HyStats.hypixel.getPlayer(sender.getCommandSenderEntity().getUniqueID(), sender.getName()).asGameStats(null, Arguments.empty());
 
-                send("Hypixel Ranks");
+                send("&l&nHypixel Ranks");
                 for (HypixelRank rank : HypixelRank.values()) {
+                    if (rank == HypixelRank.CUSTOM) continue;
+
                     try {
                         send(rank.format(player.player()));
                     } catch (Exception exception) {
                         send("&c" + exception);
+                        exception.printStackTrace(System.err);
                     }
                 }
             } else if (args[0].equalsIgnoreCase("bwlevel")) {
@@ -229,7 +263,7 @@ public class DeveloperCommand extends CommandBase {
         if (args.length == 1) {
             return UTabCompletions.tab(args[0],
                     new ArrayList<>(ImmutableList.of(
-                            "reloadapi", "forcekey", "bwlevel", "reloadspecialranks",
+                            "reloadapi", "forcekey", "bwlevel", "findaccessedstats", "reloadspecialranks",
                             "sendraw", "server", "uuid", "welcome", "version"
                     ))
             );

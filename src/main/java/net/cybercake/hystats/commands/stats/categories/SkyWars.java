@@ -16,8 +16,10 @@ public class SkyWars extends StatsCategoryCommand {
 
     @Override
     public void execute(ICommandSender sender, GameStats stats, Arguments args, boolean compact) {
-        String level = stats.getProperty("levelFormatted", "0✰");
-        stats.registerStat("Level", int.class, Integer.parseInt(level.replaceAll("\\D+", "")));
+        String level = stats.getProperty("LevelString", "levelFormatted", "0✰");
+        String levelOnlyNumbers = level.replaceAll("[^0-9]", "");
+        int levelInteger = Integer.parseInt(levelOnlyNumbers);
+        stats.registerStat("Level", int.class, levelInteger);
 
         double wins = stats.getDoubleProperty("Wins", "wins", 0D);
         double losses = stats.getDoubleProperty("Losses", "losses", 0D);
