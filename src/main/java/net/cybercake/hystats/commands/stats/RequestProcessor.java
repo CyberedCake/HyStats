@@ -9,6 +9,7 @@ import net.cybercake.hystats.utils.Pair;
 import net.cybercake.hystats.utils.TriState;
 import net.cybercake.hystats.utils.UChat;
 import net.cybercake.hystats.utils.UUIDUtils;
+import net.cybercake.hystats.utils.records.ProcessedStatsOutput;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.IChatComponent;
 
@@ -31,7 +32,7 @@ public class RequestProcessor {
         this.params = params;
     }
 
-    public Pair<IChatComponent, GameStats> processRequest(String requestedPlayer) {
+    public ProcessedStatsOutput processRequest(String requestedPlayer) {
         try {
             this.params.command.messages.clear();
 
@@ -53,6 +54,8 @@ public class RequestProcessor {
                 System.out.println("[" + (System.currentTimeMillis() - mss) + "ms] Searched for staff with their information hidden!");
             }
 
+            stats.registerStat("Name", String.class, stats.getUsername());
+            stats.registerStat("Rank", String.class, stats.player().getHighestRank());
             this.params.command.execute(this.params.sender, stats, this.params.args, this.params.compact);
 
             IChatComponent sent = this.params.showUtilityMessages ? separator() : UChat.format("");
@@ -67,10 +70,10 @@ public class RequestProcessor {
 
             System.out.println("Returning: " + sent.getUnformattedText() + ", stats=" + stats);
 
-            return new Pair<>(sent, stats);
+            return ProcessedStatsOutput.of(sent, stats);
         } catch (Exception error) {
             System.out.println("Returning: error for " + error);
-            return new Pair<>(this.params.manager.getError(error, this.params.showUtilityMessages), null);
+            return ProcessedStatsOutput.of(this.params.manager.getError(error, this.params.showUtilityMessages), GameStats.empty());
         }
     }
 

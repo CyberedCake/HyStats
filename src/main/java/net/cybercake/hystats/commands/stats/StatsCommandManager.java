@@ -30,11 +30,15 @@ public class StatsCommandManager extends CommandBase {
     private static final List<StatsCategoryCommand> commands = new ArrayList<>();
 
     public StatsCommandManager() {
-        commands.add(new BasicStats());
-        commands.add(new BedWars());
-        commands.add(new MurderMystery());
-        commands.add(new SkyWars());
-        commands.add(new Socials());
+        // some developer commands re-instantiate this class for testing purposes
+        // so we've ensured we don't get duplicate data on a 'static final' variable
+        if (commands.isEmpty()) {
+            commands.add(new GeneralStats());
+            commands.add(new BedWars());
+            commands.add(new MurderMystery());
+            commands.add(new SkyWars());
+            commands.add(new Socials());
+        }
     }
 
     public static StatsCategoryCommand getStatsClass(String text) {
@@ -90,7 +94,11 @@ public class StatsCommandManager extends CommandBase {
                 compact = false;
             }
 
-            String requestedPlayer = args[0].replace(".", sender.getName());
+            String requestedPlayer;
+            if (ImmutableList.of("!s", "!me", "!executor", "*s", "@s").contains(args[0])) {
+                requestedPlayer = sender.getName();
+            } else
+                requestedPlayer = args[0].replace(".", sender.getName());
 
             StatsCategoryCommand command = null;
             final String[] trimmedArguments = Arrays.copyOfRange(args, Math.min(2, args.length), args.length);
@@ -99,7 +107,7 @@ public class StatsCommandManager extends CommandBase {
             System.out.println("Using arguments: " + arguments.toString());
             System.out.println("| With processors: " + processors.toString());
 
-            if (args.length == 1)   command = new BasicStats();
+            if (args.length == 1)   command = new GeneralStats();
             else                    command = getStatsClass(args[1]);
 
             if (command == null) {
@@ -117,7 +125,7 @@ public class StatsCommandManager extends CommandBase {
                     .showUtilityMessages(true)
                     .build();
 
-            if (ImmutableList.of("-a", "-all", "--a", "--all", "*").contains(requestedPlayer)) {
+            if (ImmutableList.of("!a", "!all", "!everyone", "*", "@a").contains(requestedPlayer)) {
                 List<GameProfile> players = HyStats.getOnlinePlayers().stream().map(NetworkPlayerInfo::getGameProfile).limit(24).collect(Collectors.toList());
                 UChat.send(format(
                         "&7&oLoading stats of " + players.size() + " player" + (players.size() == 1 ? "" : "s") + ", please wait..."
@@ -128,7 +136,7 @@ public class StatsCommandManager extends CommandBase {
                 return;
             }
 
-            if (ImmutableList.of("-p", "-party", "--p", "--party").contains(requestedPlayer)) {
+            if (ImmutableList.of("!p", "!party", "*p", "@p").contains(requestedPlayer)) {
                 send(format("&7&oChecking your party...", null, false));
                 new CheckPartyList(processor);
                 return;
@@ -141,7 +149,7 @@ public class StatsCommandManager extends CommandBase {
                 send(format("&cThat player does not exist: &8" + requestedPlayer, null, true)); return;
             }
 
-            CompletableFuture.runAsync(() -> UChat.send(processor.processRequest(requestedPlayer).first()));
+            CompletableFuture.runAsync(() -> UChat.send(processor.processRequest(requestedPlayer).chat()));
         } catch (Exception exception) {
             send(this.getError(exception, true));
         }

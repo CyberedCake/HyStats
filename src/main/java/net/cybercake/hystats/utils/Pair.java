@@ -19,10 +19,6 @@ public class Pair<A, B> {
         return this.first.equals(this.second);
     }
 
-    public Map<A, B> asSmallMap() {
-        return CollectionUtils.singleItemMap(this.first, this.second);
-    }
-
     @Override
     public String toString() {
         return "Pair[first=" + this.first + ", second=" + this.second + "]";

@@ -2,28 +2,27 @@ package net.cybercake.hystats.commands.processors;
 
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.utils.ColorCode;
+import net.cybercake.hystats.utils.Pair;
+import net.cybercake.hystats.utils.records.ProcessedStatsOutput;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class HighlightTool implements StreamOp{
     @Override
-    public Map<IChatComponent, GameStats> apply(Map<IChatComponent, GameStats> input, String[] args) {
+    public List<ProcessedStatsOutput> apply(List<ProcessedStatsOutput> input, String[] args) {
         Pattern pattern = Pattern.compile(String.join(" ", args));
 
-        Map<IChatComponent, GameStats> output = new HashMap<>();
-        for (Map.Entry<IChatComponent, GameStats> entry : input.entrySet()) {
-            output.put(highlight(entry.getKey(), pattern), entry.getValue());
+        List<ProcessedStatsOutput> output = new ArrayList<>();
+        for (ProcessedStatsOutput entry : input) {
+            output.add(ProcessedStatsOutput.of(highlight(entry.chat(), pattern), entry.stats()));
         }
         return output;
     }

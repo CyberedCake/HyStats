@@ -8,7 +8,6 @@ import net.cybercake.hystats.exceptions.UnusualApiResponse;
 import net.cybercake.hystats.exceptions.UserNotExistException;
 import net.cybercake.hystats.hypixel.ranks.HypixelRank;
 import net.cybercake.hystats.utils.TriState;
-import net.cybercake.hystats.utils.UChat;
 import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
@@ -65,7 +64,7 @@ public class CachedPlayer {
     }
 
     public GameStats asGameStats(String prefix, Arguments args) {
-        return new GameStats(this, args, prefix);
+        return new GameStats(args, this, prefix);
     }
 
     <T> T notNull(T obj) {

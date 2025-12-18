@@ -97,7 +97,7 @@ public class DeveloperCommand extends CommandBase {
                         .compact(true)
                         .showUtilityMessages(true)
                         .build();
-                GameStats stats = processor.processRequest(sender.getName()).second();
+                GameStats stats = processor.processRequest(sender.getName()).stats();
                 List<GameStats.StatCard> cards = stats.findAccessedStats();
                 send("&f&lYour Stats, accessed by &b" + command.name + "&f&l:");
                 for (int i = 0; i < cards.size(); i++) {

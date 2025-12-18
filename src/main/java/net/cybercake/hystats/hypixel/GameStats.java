@@ -1,19 +1,16 @@
 package net.cybercake.hystats.hypixel;
 
 import com.google.gson.JsonObject;
-import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.HyStats;
+import net.cybercake.hystats.api.ApiManager;
 import net.cybercake.hystats.commands.flags.Arguments;
 import net.cybercake.hystats.commands.flags.CommandArgument;
 import net.cybercake.hystats.utils.ColorCode;
 import net.cybercake.hystats.utils.TriState;
-import net.cybercake.hystats.utils.UChat;
 import net.cybercake.hystats.utils.VariableObject;
 import net.hypixel.api.reply.GuildReply;
 import net.hypixel.api.reply.PlayerReply;
 import net.hypixel.api.reply.StatusReply;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.util.IChatComponent;
@@ -21,12 +18,15 @@ import net.minecraft.util.IChatComponent;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static net.cybercake.hystats.utils.UChat.format;
 
 public class GameStats {
+
+    public static GameStats empty() {
+        return new GameStats(new Arguments(new String[]{}), null, null);
+    }
 
     public static class StatCard extends VariableObject {
         public final String name;
@@ -47,19 +47,22 @@ public class GameStats {
     private final CachedPlayer player;
     private final Arguments args;
     private final String apiPrefix;
+    private final List<StatCard> accessedStats;
 
     private String displayName;
 
-    private final List<StatCard> accessedStats;
-
-    GameStats(CachedPlayer player, Arguments args, @Nullable String apiPrefix) {
-        this.player = player;
+    GameStats(Arguments args, @Nullable CachedPlayer player, @Nullable String apiPrefix) {
         this.args = args;
+        this.player = player;
         this.apiPrefix = apiPrefix;
+        this.accessedStats = new ArrayList<>();
+
+        if (player == null) {
+            return;
+        }
 
         CommandArgument arg = this.args.arg("displayname", "dn", "d");
         this.displayName = this.player.displayName;
-        this.accessedStats = new ArrayList<>();
         if (arg.exists()) {
             HyStats.getOnlinePlayers()
                     .stream()
@@ -113,6 +116,10 @@ public class GameStats {
 
     public TriState isStaffStatsHidden() {
         return this.player.staffHidden;
+    }
+
+    public boolean isEmpty() {
+        return this.player == null;
     }
 
     public IChatComponent getUserWithGuild() {

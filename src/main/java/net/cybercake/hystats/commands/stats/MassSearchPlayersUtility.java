@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import net.cybercake.hystats.hypixel.GameStats;
 import net.cybercake.hystats.utils.Pair;
 import net.cybercake.hystats.utils.UChat;
+import net.cybercake.hystats.utils.records.ProcessedStatsOutput;
 import net.minecraft.util.IChatComponent;
 
 import javax.annotation.Nullable;
@@ -40,38 +41,37 @@ public class MassSearchPlayersUtility {
                 .showUtilityMessages(false)
                 .compact(true);
 
-        Map<IChatComponent, GameStats> componentStats = new HashMap<>();
+        List<ProcessedStatsOutput> componentStats = new ArrayList<>();
         for (String user : users) {
-            componentStats.putAll(this.processor.processRequest(user).asSmallMap());
+            ProcessedStatsOutput processed = this.processor.processRequest(user);
+            componentStats.add(processed);
         }
 
-        if (this.processor.params.processors.countActiveProcessors() != 0)
-            componentStats = this.processor.params.processors.streamList(componentStats);
-
-        send(UChat.separator());
-        componentStats.keySet().forEach(UChat::send);
-        send(UChat.separator());
+        this.sendComponents(componentStats);
     }
 
     void showPlayers(List<GameProfile> players) {
         this.processor.params
                 .showUtilityMessages(false)
                 .compact(true);
-        System.out.println("Will be processing many players here shortly");
 
-        Map<IChatComponent, GameStats> components = new HashMap<>();
+        List<ProcessedStatsOutput> components = new ArrayList<>();
         for (GameProfile player : players) {
-            Map<IChatComponent, GameStats> temp = this.processor.processRequest(player.getName());
-            System.out.println("Now in loop, temp=" + temp);
-            components.putAll(temp);
-            System.out.println("Complete components=" + components);
+            ProcessedStatsOutput processed = this.processor.processRequest(player.getName());
+            components.add(processed);
         }
 
+        this.sendComponents(components);
+    }
+
+    private void sendComponents(List<ProcessedStatsOutput> components) {
         if (this.processor.params.processors.countActiveProcessors() != 0)
             components = this.processor.params.processors.streamList(components);
 
         send(UChat.separator());
-        components.keySet().forEach(UChat::send);
+        for (ProcessedStatsOutput pair : components) {
+            send(pair.chat());
+        }
         send(UChat.separator());
     }
 

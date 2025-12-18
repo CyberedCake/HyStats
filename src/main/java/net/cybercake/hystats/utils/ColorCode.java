@@ -77,7 +77,7 @@ public enum ColorCode {
             return null;
         }
         input = input.replace(getCharacter(), '&');
-        return input.replaceAll("(?i)&[abcdef0-9klom]", "");
+        return input.replaceAll("(?i)&[abcdefr0-9klom]", "");
     }
 
     public static char getCharacter() {

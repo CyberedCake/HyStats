@@ -1,5 +1,7 @@
 package net.cybercake.hystats.commands.processors.filter;
 
+import java.util.Arrays;
+
 public class Operation {
 
     public static Operation from(String string) {
@@ -7,6 +9,7 @@ public class Operation {
     }
 
     private final char[] characters;
+    private boolean inversion;
 
     private Operation(char[] characters) {
         this.characters = characters;
@@ -15,24 +18,38 @@ public class Operation {
     private boolean compare(Number one, Number two, char op) {
         double first = one.doubleValue();
         double second = two.doubleValue();
+        boolean result = false;
         switch (op) {
             case '=':
-                return first == second;
+                result = first == second; break;
             case '>':
-                return first > second;
+                result = first > second; break;
             case '<':
-                return first < second;
+                result = first < second; break;
         }
-        return false;
+
+        return result;
     }
 
     public boolean compare(Number one, Number two) {
         for (char character : characters) {
-            if (!compare(one, two, character)) {
-                return false;
+            if (character == '!' || character == '~') {
+                inversion = !inversion;
+                continue;
             }
+
+            boolean result = compare(one, two, character);
+            if (inversion) {
+                result = !result;
+                inversion = false;
+            }
+            return result;
         }
-        return true;
+        return false;
     }
 
+    @Override
+    public String toString() {
+        return "Operation[characters=" + Arrays.toString(characters) + "]";
+    }
 }

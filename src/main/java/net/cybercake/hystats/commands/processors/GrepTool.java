@@ -1,27 +1,26 @@
 package net.cybercake.hystats.commands.processors;
 
 import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.utils.Pair;
+import net.cybercake.hystats.utils.records.ProcessedStatsOutput;
 import net.minecraft.util.IChatComponent;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class GrepTool implements StreamOp {
 
     @Override
-    public Map<IChatComponent, GameStats> apply(Map<IChatComponent, GameStats> input, String[] args) {
+    public List<ProcessedStatsOutput> apply(List<ProcessedStatsOutput> input, String[] args) {
         Pattern pattern = Pattern.compile(String.join(" ", args));
 
-        Map<IChatComponent, GameStats> output = new HashMap<>();
-        for (Map.Entry<IChatComponent, GameStats> entry : input.entrySet()) {
-            if (!pattern.matcher(entry.getKey().getFormattedText()).find()) {
+        List<ProcessedStatsOutput> output = new ArrayList<>();
+        for (ProcessedStatsOutput entry : input) {
+            if (!pattern.matcher(entry.chat().getFormattedText()).find()) {
                 continue;
             }
-            output.put(entry.getKey(), entry.getValue());
+            output.add(entry);
         }
 
         return new HighlightTool().apply(output, args);

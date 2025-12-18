@@ -2,16 +2,15 @@ package net.cybercake.hystats.commands.processors.filter;
 
 import net.cybercake.hystats.commands.processors.StreamOp;
 import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.utils.Pair;
+import net.cybercake.hystats.utils.records.ProcessedStatsOutput;
 import net.minecraft.util.IChatComponent;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class StatFilterTool implements StreamOp {
     @Override
-    public Map<IChatComponent, GameStats> apply(Map<IChatComponent, GameStats> input, String[] args) {
+    public List<ProcessedStatsOutput> apply(List<ProcessedStatsOutput> input, String[] args) {
         System.out.println("Args: " + Arrays.toString(args));
 
         String first = args[0];
@@ -24,22 +23,26 @@ public class StatFilterTool implements StreamOp {
 
         System.out.println("firstNumber=" + firstNumber + ", op=" + operation + ", secondNumber=" + secondNumber);
 
-        Map<IChatComponent, GameStats> output = new HashMap<>();
-        for (Map.Entry<IChatComponent, GameStats> entry : input.entrySet()) {
+        List<ProcessedStatsOutput> output = new ArrayList<>();
+        for (ProcessedStatsOutput entry : input) {
+            GameStats stats = entry.stats();
             Number specificFirstNumber = firstNumber;
             if (firstNumber == null) {
-                specificFirstNumber = asNumber(entry.getValue().findStat(first).getAsString());
-                System.out.println("as of entry " + entry.getValue().getUsername() + ": specific firstNumber=" + specificFirstNumber);
+                specificFirstNumber = asNumber(stats.findStat(first).getAsString());
+                System.out.println("as of entry " + stats.getUsername() + ": specific firstNumber=" + specificFirstNumber);
             }
             Number specificSecondNumber = secondNumber;
             if (secondNumber == null) {
-                specificSecondNumber = asNumber(entry.getValue().findStat(second).getAsString());
-                System.out.println("as of entry " + entry.getValue().getUsername() + ": specific secondNumber=" + specificSecondNumber);
+                specificSecondNumber = asNumber(stats.findStat(second).getAsString());
+                System.out.println("as of entry " + stats.getUsername() + ": specific secondNumber=" + specificSecondNumber);
             }
 
 
-            if (operation.compare(specificFirstNumber, specificSecondNumber)) {
-                output.put(entry.getKey(), entry.getValue());
+            System.out.println("op: " + specificFirstNumber + " " + operation.toString() + " " + specificSecondNumber);
+            boolean cmp = operation.compare(specificFirstNumber, specificSecondNumber);
+            System.out.println("|- cmp ret: " + cmp);
+            if (cmp) {
+                output.add(ProcessedStatsOutput.of(entry.chat(), stats));
             }
         }
 

@@ -1,8 +1,12 @@
 package net.cybercake.hystats.commands.processors;
 
 import net.cybercake.hystats.commands.processors.filter.StatFilterTool;
+import net.cybercake.hystats.utils.records.CurrentCommandProcessor;
 import net.cybercake.hystats.hypixel.GameStats;
+import net.cybercake.hystats.utils.CollectionUtils;
+import net.cybercake.hystats.utils.Pair;
 import net.cybercake.hystats.utils.UChat;
+import net.cybercake.hystats.utils.records.ProcessedStatsOutput;
 import net.minecraft.util.IChatComponent;
 
 import java.util.*;
@@ -15,13 +19,13 @@ public class Processors {
         List<String> args = new ArrayList<>();
     }
 
-    private String[] args;
-    private final Map<StreamOp, List<String>> thisCommandProcessors;
+    private final String[] args;
+    private final List<CurrentCommandProcessor> thisCommandProcessors;
     private int startIndex;
 
     public Processors(String[] args) {
         this.args = args;
-        this.thisCommandProcessors = new HashMap<>();
+        this.thisCommandProcessors = new ArrayList<>();
         this.startIndex = -1;
 
         final StreamOp DEFAULT_PROCESSOR = new RedirectPipe();
@@ -30,19 +34,20 @@ public class Processors {
         processors.put("highlight", new HighlightTool());
         processors.put("join", new JoinTool());
         processors.put("redirect", new RedirectPipe());
-        processors.put("stat", new StatFilterTool());
+        processors.put("filter", new StatFilterTool());
+        processors.put("sort", new SortTool());
 
         ProcessorBuilder builder = null;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
 
-            if (arg.contains("|") || arg.contains(">")) {
+            if (arg.contains("|") || arg.contains("@")) {
                 if (startIndex == -1) startIndex = i;
 
                 this.finalizeBuilder(builder);
                 builder = new ProcessorBuilder();
 
-                arg = arg.replace("|", "").replace(">", "");
+                arg = arg.replace("|", "").replace("@", "");
                 if (arg.isEmpty())
                     continue;
             }
@@ -70,7 +75,7 @@ public class Processors {
             return;
         }
 
-        this.thisCommandProcessors.put(builder.processor, builder.args);
+        this.thisCommandProcessors.add(CurrentCommandProcessor.of(builder.processor, builder.args));
     }
 
     public String[] removeData() {
@@ -80,19 +85,28 @@ public class Processors {
         return Arrays.copyOfRange(args, 0, this.startIndex);
     }
 
-    public Map<IChatComponent, GameStats> streamList(Map<IChatComponent, GameStats> components) {
+    public List<ProcessedStatsOutput> streamList(List<ProcessedStatsOutput> components) {
+        List<ProcessedStatsOutput> result = new ArrayList<>();
+        for (ProcessedStatsOutput component : components) {
+            if (component.stats().isEmpty())
+                continue;
+            result.add(component);
+        }
+
         System.out.println("Streaming list of chat components via " + Processors.class.getCanonicalName() + "!");
-        for (Map.Entry<StreamOp, List<String>> op : this.thisCommandProcessors.entrySet()) {
-            String[] args = op.getValue().toArray(new String[0]);
+        for (CurrentCommandProcessor curr : this.thisCommandProcessors) {
+            System.out.println("| curr: " + curr);
+            String[] args = curr.args().toArray(new String[0]);
+            System.out.println("| with arguments: " + Arrays.toString(args));
+            result = curr.op().apply(result, args);
+        }
+        System.out.println("Complete streaming.");
 
-            components = op.getKey().apply(components, args);
+        if (result .isEmpty()) {
+            result .add(ProcessedStatsOutput.of(UChat.format("&cNo returned results.", "&cProcessors: &8" + this, false), null));
         }
 
-        if (components.isEmpty()) {
-            components.put(UChat.format("&cNo returned results.", "&cProcessors: &8" + this, false), null);
-        }
-
-        return components;
+        return result;
     }
 
     public int countActiveProcessors() { return this.thisCommandProcessors.size(); }
@@ -100,8 +114,8 @@ public class Processors {
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(", ", "Processors[", "]");
-        for (Map.Entry<StreamOp, List<String>> op : this.thisCommandProcessors.entrySet()) {
-            joiner.add("{" + op.getKey().getClass().getCanonicalName() + ", args: " + op.getValue().toString() + "}");
+        for (CurrentCommandProcessor curr : this.thisCommandProcessors) {
+            joiner.add("{" + curr.op().getClass().getCanonicalName() + ", args: " + curr.args().toString() + "}");
         }
         return joiner.toString();
     }
