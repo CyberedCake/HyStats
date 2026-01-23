@@ -27,6 +27,8 @@ import static net.cybercake.hystats.utils.UChat.*;
 
 public class StatsCommandManager extends CommandBase {
 
+    public static int MAX_PLAYERS_PER_SEARCH = 24;
+
     private static final List<StatsCategoryCommand> commands = new ArrayList<>();
 
     public StatsCommandManager() {
@@ -126,7 +128,7 @@ public class StatsCommandManager extends CommandBase {
                     .build();
 
             if (ImmutableList.of("!a", "!all", "!everyone", "*", "@a").contains(requestedPlayer)) {
-                List<GameProfile> players = HyStats.getOnlinePlayers().stream().map(NetworkPlayerInfo::getGameProfile).limit(24).collect(Collectors.toList());
+                List<GameProfile> players = HyStats.getOnlinePlayers().stream().map(NetworkPlayerInfo::getGameProfile).limit(MAX_PLAYERS_PER_SEARCH).collect(Collectors.toList());
                 UChat.send(format(
                         "&7&oLoading stats of " + players.size() + " player" + (players.size() == 1 ? "" : "s") + ", please wait..."
                 ));

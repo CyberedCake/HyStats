@@ -46,6 +46,10 @@ public class BedWars extends StatsCategoryCommand {
 
         if (compact) {
             text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
+            if (stats.isStaffStatsHidden().bool()) {
+                text(HIDDEN_STATS);
+                return;
+            }
             text("Star: &7" + starFormatted,
                     "&6Prestige:\n&f" + prestigeFormatted
             );
@@ -56,6 +60,9 @@ public class BedWars extends StatsCategoryCommand {
         }
 
         text(format("Bed Wars Stats of ").appendSibling(stats.getUserWithGuild()));
+        if (stats.isStaffStatsHidden().bool()) {
+            text(format(HIDDEN_STATS));
+        }
         text(" ");
         text("Level: &7" + starFormatted,
                 "&6Prestige:\n&f" + prestigeFormatted);

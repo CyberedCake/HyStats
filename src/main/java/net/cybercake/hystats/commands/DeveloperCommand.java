@@ -78,6 +78,28 @@ public class DeveloperCommand extends CommandBase {
                         send("&cReloaded the Hypixel API and ran into an issue! Check logs.");
                     }
                 }).start();
+            } else if (args[0].equalsIgnoreCase("searchlimit")) {
+                if (args.length < 2) {
+                    send("The search limit is &l" + StatsCommandManager.MAX_PLAYERS_PER_SEARCH);
+                    return;
+                }
+                int newLimit;
+                try {
+                    newLimit = Integer.parseInt(args[1]);
+                } catch (NumberFormatException exception) {
+                    send("&cMust provide integer!");
+                    return;
+                }
+                if (newLimit < 1 || newLimit > 999) {
+                    send("&cMust be integer within &b1 - 999&c!");
+                    return;
+                }
+                send("Set max from " + StatsCommandManager.MAX_PLAYERS_PER_SEARCH + " to " + newLimit + "!");
+                if (newLimit > 30) {
+                    send("&cWARNING - this could cause API errors!");
+                    send("&cWARNING - we strongly recommend to stay below 24!");
+                }
+                StatsCommandManager.MAX_PLAYERS_PER_SEARCH = newLimit;
             } else if (args[0].equalsIgnoreCase("findaccessedstats")) {
                 if (args.length < 2) {
                     send("&cMust provide category!");
@@ -264,7 +286,7 @@ public class DeveloperCommand extends CommandBase {
             return UTabCompletions.tab(args[0],
                     new ArrayList<>(ImmutableList.of(
                             "reloadapi", "forcekey", "bwlevel", "findaccessedstats", "reloadspecialranks",
-                            "sendraw", "server", "uuid", "welcome", "version"
+                            "sendraw", "server", "uuid", "welcome", "version", "searchlimit"
                     ))
             );
         }

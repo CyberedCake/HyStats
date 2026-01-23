@@ -38,6 +38,10 @@ public class SkyWars extends StatsCategoryCommand {
 
         if (compact) {
             text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
+            if (stats.isStaffStatsHidden().bool()) {
+                text(HIDDEN_STATS);
+                return;
+            }
             text("Level: &7" + level);
             text("WLR: &e" + formatDouble(wins / losses, "#,###.00"), "&fWins/Losses:\n&2" + formatDouble(wins) + "&7/&4" + formatDouble(losses));
             text("KDR: &6" + formatDouble(kills / deaths, "#,###.00"), "&fKills/Deaths:\n&a" + formatDouble(kills) + "&7/&c" + formatDouble(deaths));
@@ -46,6 +50,9 @@ public class SkyWars extends StatsCategoryCommand {
         }
 
         text(format("SkyWars Stats of ").appendSibling(stats.getUserWithGuild()));
+        if (stats.isStaffStatsHidden().bool()) {
+            text(HIDDEN_STATS);
+        }
         text(" ");
         text("Level: &7" + level);
         text("Wins/Losses: &2" + formatDouble(wins) + " &7/ &4" + formatDouble(losses) + " &f(WLR: &6" + formatDouble((wins / losses), "#,###.00") + "&f)");

@@ -52,6 +52,10 @@ public class GeneralStats extends StatsCategoryCommand {
 
         if (compact) {
             text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID());
+            if (stats.isStaffStatsHidden().bool()) {
+                text(HIDDEN_STATS);
+                return;
+            }
             text("Level: &6" + networkLevel);
             text("AP: &e" + achievementPoints);
             text("Age: &2" + Time.getDuration(System.currentTimeMillis() / 1_000, stats.player().getFirstLoginDate().toEpochSecond(), false), firstLoginHover);
@@ -63,6 +67,9 @@ public class GeneralStats extends StatsCategoryCommand {
         } else {
 
             text(format("Stats of ").appendSibling(stats.getUserWithGuild()));
+            if (stats.isStaffStatsHidden().bool()) {
+                text(HIDDEN_STATS);
+            }
             text(" ");
             text("Level: &6" + networkLevel);
             text("Achievement Points: &e" + achievementPoints);
@@ -71,8 +78,8 @@ public class GeneralStats extends StatsCategoryCommand {
                     firstLoginHover);
             JsonObject object = stats.getObjectProperty("SocialMedia", "socialMedia.links");
             Map<String, String> map = new Gson().fromJson(object, new TypeToken<Map<String, String>>() {}.getType());
-            stats.registerStat("SocialMediaAccounts", int.class, map.size());
             if (object != null && !map.isEmpty()) {
+                stats.registerStat("SocialMediaAccounts", int.class, map.size());
                 IChatComponent component = format("Social Media: &7" + map.size() + " linked account" + (map.size() == 1 ? "" : "s") + " ... click to view!");
                 component.getChatStyle()
                         .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, format("&eClick to view " + stats.getUser() + "&e'" + (stats.player().getName().endsWith("s") ? "" : "s") + " social media!")))

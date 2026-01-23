@@ -40,6 +40,10 @@ public class MurderMystery extends StatsCategoryCommand {
 
         if (compact) {
             text(stats.getUser(), "&eClick here to expand " + stats.getUser(), "/hystats " + stats.getUUID() + " " + this.name);
+            if (stats.isStaffStatsHidden().bool()) {
+                text(HIDDEN_STATS);
+                return;
+            }
             text("&fWins: &a" + formatDouble(wins),
                     "&6&l&nWins:\n&eTotal: &f" + formatDouble(wins) + "\n&cAs Murderer: &f" +formatDouble(winsMurderer) + "\n&bAs Detective: &f" + formatDouble(winsDetective)
             );
@@ -56,6 +60,9 @@ public class MurderMystery extends StatsCategoryCommand {
         }
 
         text(format("Murder Mystery Stats of ").appendSibling(stats.getUserWithGuild()));
+        if (stats.isStaffStatsHidden().bool()) {
+            text(HIDDEN_STATS);
+        }
         text(" ");
         text(showAll("Chances", "&aAs Innocent::&a" + formatDouble(chanceAny) + "%", formatDouble(chanceMurderer) + "%", formatDouble(chanceDetective) + "%"));
         text(showAll("Wins", formatDouble(wins), formatDouble(winsMurderer), formatDouble(winsDetective)));

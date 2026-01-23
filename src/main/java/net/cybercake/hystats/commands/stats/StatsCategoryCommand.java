@@ -13,6 +13,8 @@ import java.util.List;
 
 public abstract class StatsCategoryCommand {
 
+    public static final String HIDDEN_STATS = "&4** This person's stats are hidden! **";
+
     public final String name;
     public final @Nullable String prefix;
     public final String description;
